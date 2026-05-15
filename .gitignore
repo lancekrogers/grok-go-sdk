@@ -1,0 +1,30 @@
+# Build artifacts
+bin/
+coverage/
+*.out
+*.test
+*.prof
+mem.out
+cpu.out
+
+# Go workspace files (uncommitted)
+go.work
+go.work.sum
+
+# Editor & OS
+.idea/
+.vscode/*
+!.vscode/settings.json
+.DS_Store
+*.swp
+*.swo
+
+# Local environment
+.env
+.env.local
+
+# Mock binary build output
+test/mockserver/bin/
+
+# Trace exports
+trace-exports/
