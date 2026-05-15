@@ -3,8 +3,7 @@
 #
 # Each demo builds the corresponding example under examples/<name>/ and
 # runs the resulting binary. Demos require a working grok install and a
-# valid grok login. The obey_runtime demo additionally expects the SDK
-# wiring described in workflow/design/go-grok-sdk/.
+# valid grok login.
 
 set dotenv-load := true
 
@@ -62,10 +61,10 @@ subagents: build-subagents
     @echo "Starting subagents demo..."
     {{BIN_DIR}}/subagents
 
-# Build and run obey_runtime demo
-obey-runtime: build-obey-runtime
-    @echo "Starting obey_runtime demo..."
-    {{BIN_DIR}}/obey_runtime
+# Build and run agent_runtime demo
+agent-runtime: build-agent-runtime
+    @echo "Starting agent_runtime demo..."
+    {{BIN_DIR}}/agent_runtime
 
 # Build and run dangerous example (guarded)
 dangerous: _check-dangerous build-dangerous
@@ -101,8 +100,8 @@ build-check-loop:
 build-subagents:
     @just build subagents
 
-build-obey-runtime:
-    @just build obey-runtime
+build-agent-runtime:
+    @just build agent-runtime
 
 build-dangerous:
     @echo "Building dangerous example..."
@@ -111,7 +110,7 @@ build-dangerous:
     @echo "Built: {{BIN_DIR}}/dangerous_example"
 
 # Build all demos
-build-all: build-basic build-streaming build-sessions build-mcp build-agent-stdio build-worktree build-best-of-n build-check-loop build-subagents build-obey-runtime
+build-all: build-basic build-streaming build-sessions build-mcp build-agent-stdio build-worktree build-best-of-n build-check-loop build-subagents build-agent-runtime
     @echo "All demos built"
 
 # Check dangerous environment requirements
@@ -148,7 +147,7 @@ gif-list:
     @echo "  - best-of-n"
     @echo "  - check-loop"
     @echo "  - subagents"
-    @echo "  - obey-runtime"
+    @echo "  - agent-runtime"
     @echo ""
     @echo "Usage: just demo gif <demo-name>"
     @echo "       just demo gif-all"

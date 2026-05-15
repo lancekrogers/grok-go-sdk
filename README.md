@@ -12,10 +12,6 @@ retry policies.
 
 - Repository: private during initial development.
 - License: MIT.
-- Reference design: see the
-  [`workflow/design/go-grok-sdk/`](../../workflow/design/go-grok-sdk/)
-  package in the obey-campaign planning repo for the full architecture,
-  CLI reference, API surface, testing strategy, and execution plan.
 - Captured `grok` CLI snapshot: `grok 0.1.210 (8b63e9068c)`.
 
 ## Prerequisites

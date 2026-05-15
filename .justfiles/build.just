@@ -33,7 +33,7 @@ mock:
     @echo "Built: test/mockserver/bin/grok-mock"
 
 # Build all examples
-examples: basic streaming sessions mcp agent-stdio worktree best-of-n check-loop subagents obey-runtime
+examples: basic streaming sessions mcp agent-stdio worktree best-of-n check-loop subagents agent-runtime
     @echo "All examples built"
 
 # Build basic example
@@ -99,9 +99,10 @@ subagents:
     cd {{PROJECT_DIR}} && go build -o {{BIN_DIR}}/subagents ./examples/subagents
     @echo "Built: {{BIN_DIR}}/subagents"
 
-# Build obey_runtime example
-obey-runtime:
-    @echo "Building obey_runtime example..."
+# Build agent_runtime example (embedded long-running agent host:
+# budget tracker, audit plugin, tool filter, stdio agent session)
+agent-runtime:
+    @echo "Building agent_runtime example..."
     @mkdir -p {{BIN_DIR}}
-    cd {{PROJECT_DIR}} && go build -o {{BIN_DIR}}/obey_runtime ./examples/obey_runtime
-    @echo "Built: {{BIN_DIR}}/obey_runtime"
+    cd {{PROJECT_DIR}} && go build -o {{BIN_DIR}}/agent_runtime ./examples/agent_runtime
+    @echo "Built: {{BIN_DIR}}/agent_runtime"
