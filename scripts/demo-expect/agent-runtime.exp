@@ -1,0 +1,41 @@
+#!/usr/bin/expect -f
+# agent-runtime demo: drives the stdin-reading REPL with two short prompts
+# then closes stdin so the loop exits.
+
+set timeout 180
+log_user 1
+
+spawn -noecho bash -c "echo '\$ just demo agent-runtime' && sleep 0.6 && cd $env(PROJECT_DIR) && just demo agent-runtime"
+
+# Wait for the ready banner the example prints after handshake + auth.
+expect {
+    "type a prompt" {}
+    timeout {
+        puts "Timeout waiting for ready banner"
+        exit 1
+    }
+}
+
+# Turn 1
+send "Reply with one word: hello\r"
+expect {
+    "tokens=" {}
+    timeout {
+        puts "Timeout waiting for first turn"
+        exit 1
+    }
+}
+
+# Turn 2
+send "Now reply with one word: world\r"
+expect {
+    "tokens=" {}
+    timeout {
+        puts "Timeout waiting for second turn"
+        exit 1
+    }
+}
+
+# Close stdin to break the scanner loop and exit
+send "\x04"
+expect eof
