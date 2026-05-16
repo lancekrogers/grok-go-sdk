@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -80,6 +81,23 @@ func route(args []string) int {
 
 func doPrompt(args []string) int {
 	format := flagValue(args, "--output-format")
+	scenario := os.Getenv("GROK_MOCK_SCENARIO")
+	if scenario != "" {
+		ext := "txt"
+		dir := "default"
+		switch format {
+		case "json":
+			ext = "json"
+			dir = "json"
+		case "streaming-json":
+			ext = "jsonl"
+			dir = "streaming-json"
+		}
+		if code, ok := emitFixture(dir, scenario, ext); ok {
+			return code
+		}
+		return 99
+	}
 	switch format {
 	case "json":
 		return emitJSON()
@@ -89,6 +107,24 @@ func doPrompt(args []string) int {
 		fmt.Println("Hello! How can I help you today?")
 		return 0
 	}
+}
+
+func emitFixture(subdir, scenario, ext string) (int, bool) {
+	root := os.Getenv("GROK_MOCK_TESTDATA")
+	if root == "" {
+		exe, err := os.Executable()
+		if err == nil {
+			root = filepath.Join(filepath.Dir(exe), "..", "..", "..", "test", "testdata")
+		}
+	}
+	path := filepath.Join(root, subdir, scenario+"."+ext)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "mock: fixture not found: %s\n", path)
+		return 0, false
+	}
+	os.Stdout.Write(data)
+	return 0, true
 }
 
 func emitJSON() int {
