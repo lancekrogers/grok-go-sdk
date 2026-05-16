@@ -1,3 +1,39 @@
 package dangerous
 
-// TODO: implement dangerous.go
+import (
+	"errors"
+	"os"
+
+	"github.com/lancekrogers/grok-go-sdk/pkg/grok"
+)
+
+const enableEnv = "GROK_ENABLE_DANGEROUS"
+const enableValue = "i-accept-all-risks"
+
+var (
+	ErrNotEnabled = errors.New("dangerous: GROK_ENABLE_DANGEROUS must be set to \"i-accept-all-risks\"")
+	ErrProduction = errors.New("dangerous: refusing to run in production environment")
+)
+
+type Client struct {
+	inner *grok.GrokClient
+}
+
+func NewDangerousClient(binPath string) (*Client, error) {
+	if os.Getenv(enableEnv) != enableValue {
+		return nil, ErrNotEnabled
+	}
+	if isProduction() {
+		return nil, ErrProduction
+	}
+	return &Client{inner: grok.NewClient(binPath)}, nil
+}
+
+func isProduction() bool {
+	for _, k := range []string{"GO_ENV", "NODE_ENV"} {
+		if os.Getenv(k) == "production" {
+			return true
+		}
+	}
+	return false
+}
