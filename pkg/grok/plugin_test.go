@@ -9,9 +9,9 @@ import (
 )
 
 type recordingPlugin struct {
-	name    string
-	order   *[]string
-	before  func() error
+	name   string
+	order  *[]string
+	before func() error
 }
 
 func (r *recordingPlugin) Name() string { return r.name }

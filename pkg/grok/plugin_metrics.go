@@ -36,9 +36,9 @@ func (p *MetricsPlugin) GetMetrics() map[string]float64 {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return map[string]float64{
-		"runs":             p.runs,
-		"errors":           p.errors,
-		"total_cost_usd":   p.totalCostUSD,
-		"total_duration":   p.totalDuration,
+		"runs":           p.runs,
+		"errors":         p.errors,
+		"total_cost_usd": p.totalCostUSD,
+		"total_duration": p.totalDuration,
 	}
 }
