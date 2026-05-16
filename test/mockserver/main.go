@@ -82,49 +82,77 @@ func route(args []string) int {
 func doPrompt(args []string) int {
 	format := flagValue(args, "--output-format")
 	scenario := os.Getenv("GROK_MOCK_SCENARIO")
-	if scenario != "" {
-		ext := "txt"
-		dir := "default"
-		switch format {
-		case "json":
-			ext = "json"
-			dir = "json"
-		case "streaming-json":
-			ext = "jsonl"
-			dir = "streaming-json"
-		}
-		if code, ok := emitFixture(dir, scenario, ext); ok {
-			return code
-		}
-		return 99
+	if scenario == "" {
+		scenario = "say-hello"
 	}
 	switch format {
 	case "json":
-		return emitJSON()
+		return emitFixture("json/" + scenario + ".json")
 	case "streaming-json":
-		return emitStreaming()
+		return emitFixture("streaming-json/" + scenario + ".jsonl")
+	case "plain", "":
+		return emitPlain(scenario)
 	default:
-		fmt.Println("Hello! How can I help you today?")
-		return 0
+		fmt.Fprintf(os.Stderr, "mock: unknown output-format %q\n", format)
+		return 2
 	}
 }
 
-func emitFixture(subdir, scenario, ext string) (int, bool) {
-	root := os.Getenv("GROK_MOCK_TESTDATA")
-	if root == "" {
-		exe, err := os.Executable()
-		if err == nil {
-			root = filepath.Join(filepath.Dir(exe), "..", "..", "..", "test", "testdata")
+func emitFixture(rel string) int {
+	base := os.Getenv("GROK_MOCK_TESTDATA")
+	if base == "" {
+		base = locateTestdata()
+	}
+	if base == "" {
+		fmt.Fprintln(os.Stderr, "mock: cannot locate test/testdata directory")
+		return 99
+	}
+	path := filepath.Join(base, rel)
+	b, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "mock: fixture missing: %s: %v\n", path, err)
+		return 99
+	}
+	os.Stdout.Write(b)
+	return 0
+}
+
+func emitPlain(scenario string) int {
+	switch scenario {
+	case "say-hello":
+		fmt.Println("Hello! How can I help you today?")
+	default:
+		fmt.Println("mock plain response: " + scenario)
+	}
+	return 0
+}
+
+func locateTestdata() string {
+	if exe, err := os.Executable(); err == nil {
+		for d := filepath.Dir(exe); ; {
+			candidate := filepath.Join(d, "test", "testdata")
+			if st, err := os.Stat(candidate); err == nil && st.IsDir() {
+				return candidate
+			}
+			parent := filepath.Dir(d)
+			if parent == d {
+				break
+			}
+			d = parent
 		}
 	}
-	path := filepath.Join(root, subdir, scenario+"."+ext)
-	data, err := os.ReadFile(path)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "mock: fixture not found: %s\n", path)
-		return 0, false
+	cwd, _ := os.Getwd()
+	for d := cwd; ; {
+		candidate := filepath.Join(d, "test", "testdata")
+		if st, err := os.Stat(candidate); err == nil && st.IsDir() {
+			return candidate
+		}
+		parent := filepath.Dir(d)
+		if parent == d {
+			return ""
+		}
+		d = parent
 	}
-	os.Stdout.Write(data)
-	return 0, true
 }
 
 func emitJSON() int {
