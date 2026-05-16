@@ -14,23 +14,54 @@ import (
 type EventType string
 
 const (
+	EventText              EventType = "text"
+	EventThought           EventType = "thought"
+	EventEnd               EventType = "end"
+	EventError             EventType = "error"
 	EventAssistant         EventType = "assistant"
 	EventDelta             EventType = "delta"
-	EventThought           EventType = "thought"
 	EventTool              EventType = "tool"
 	EventToolResult        EventType = "tool_result"
 	EventPermissionRequest EventType = "permission_request"
 	EventResult            EventType = "result"
-	EventError             EventType = "error"
 )
 
 type Event struct {
-	Type      EventType       `json:"type"`
-	Text      string          `json:"text,omitempty"`
-	Tool      string          `json:"tool,omitempty"`
-	Args      json.RawMessage `json:"args,omitempty"`
-	SessionID string          `json:"sessionId,omitempty"`
-	Raw       json.RawMessage `json:"-"`
+	Type EventType `json:"type"`
+
+	Data       string `json:"data,omitempty"`
+	StopReason string `json:"stopReason,omitempty"`
+	SessionID  string `json:"sessionId,omitempty"`
+	RequestID  string `json:"requestId,omitempty"`
+	Message    string `json:"message,omitempty"`
+
+	Text string          `json:"text,omitempty"`
+	Tool string          `json:"tool,omitempty"`
+	Args json.RawMessage `json:"args,omitempty"`
+
+	Raw json.RawMessage `json:"-"`
+}
+
+func (e Event) Content() string {
+	switch e.Type {
+	case EventText, EventThought:
+		if e.Data != "" {
+			return e.Data
+		}
+		return e.Text
+	case EventError:
+		return e.Message
+	case EventAssistant, EventDelta:
+		if e.Text != "" {
+			return e.Text
+		}
+		return e.Data
+	}
+	return ""
+}
+
+func (e Event) IsTerminal() bool {
+	return e.Type == EventEnd || e.Type == EventResult || e.Type == EventError
 }
 
 func parseEventLine(b []byte) (Event, error) {

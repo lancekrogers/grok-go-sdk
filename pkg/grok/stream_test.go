@@ -10,24 +10,42 @@ import (
 
 func TestParseEventLine_KnownTypes(t *testing.T) {
 	cases := []struct {
-		line string
-		want EventType
+		line        string
+		want        EventType
+		wantContent string
 	}{
-		{`{"type":"assistant","text":"hi"}`, EventAssistant},
-		{`{"type":"tool","tool":"Read","args":{"path":"a"}}`, EventTool},
-		{`{"type":"result","sessionId":"abc"}`, EventResult},
+		{`{"type":"thought","data":"The"}`, EventThought, "The"},
+		{`{"type":"text","data":"Hello"}`, EventText, "Hello"},
+		{`{"type":"end","stopReason":"EndTurn","sessionId":"abc","requestId":"r1"}`, EventEnd, ""},
+		{`{"type":"error","message":"unknown model"}`, EventError, "unknown model"},
 	}
 	for _, tc := range cases {
 		ev, err := parseEventLine([]byte(tc.line))
 		if err != nil {
-			t.Fatalf("parse: %v", err)
+			t.Fatalf("parse %q: %v", tc.line, err)
 		}
 		if ev.Type != tc.want {
 			t.Fatalf("got %q want %q", ev.Type, tc.want)
 		}
+		if got := ev.Content(); got != tc.wantContent {
+			t.Fatalf("content for %q: got %q want %q", tc.line, got, tc.wantContent)
+		}
 		if len(ev.Raw) == 0 {
 			t.Fatal("Raw not populated")
 		}
+	}
+}
+
+func TestEvent_EndCarriesSessionMetadata(t *testing.T) {
+	ev, err := parseEventLine([]byte(`{"type":"end","stopReason":"EndTurn","sessionId":"sess-1","requestId":"req-1"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ev.IsTerminal() {
+		t.Fatal("end should be terminal")
+	}
+	if ev.SessionID != "sess-1" || ev.RequestID != "req-1" || ev.StopReason != "EndTurn" {
+		t.Fatalf("missing metadata: %#v", ev)
 	}
 }
 

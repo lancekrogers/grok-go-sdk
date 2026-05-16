@@ -155,31 +155,6 @@ func locateTestdata() string {
 	}
 }
 
-func emitJSON() int {
-	r := map[string]any{
-		"text":       "Hello! How can I help you today?",
-		"stopReason": "EndTurn",
-		"sessionId":  "mock-session-01HMOCK0000000000000000000",
-		"requestId":  "mock-request-01HMOCK0000000000000000000",
-	}
-	b, _ := json.Marshal(r)
-	os.Stdout.Write(b)
-	return 0
-}
-
-func emitStreaming() int {
-	events := []map[string]any{
-		{"type": "delta", "text": "Hello! "},
-		{"type": "assistant", "text": "Hello! How can I help you today?"},
-		{"type": "result", "sessionId": "mock-session-01HMOCK0000000000000000000"},
-	}
-	for _, e := range events {
-		b, _ := json.Marshal(e)
-		os.Stdout.Write(append(b, '\n'))
-	}
-	return 0
-}
-
 func doSessions(args []string) int {
 	if len(args) == 0 {
 		return 0
