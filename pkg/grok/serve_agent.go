@@ -10,6 +10,23 @@ import (
 	"time"
 )
 
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (s *syncBuffer) Write(p []byte) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.Write(p)
+}
+
+func (s *syncBuffer) String() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.String()
+}
+
 type ServeAgentConfig struct {
 	Bind         string
 	Secret       string
@@ -50,8 +67,8 @@ func (c *GrokClient) StartServeAgent(ctx context.Context, cfg *ServeAgentConfig)
 	}
 
 	cmd := execCommand(ctx, c.BinPath, args...)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
+	stderr := &syncBuffer{}
+	cmd.Stderr = stderr
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
