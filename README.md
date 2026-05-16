@@ -256,5 +256,3 @@ MIT. See [LICENSE](LICENSE).
 ## Acknowledgments
 
 Built on top of the [grok CLI](https://github.com/xai-org/grok) by xAI.
-The shape of this SDK was informed by Lance Rogers' earlier
-[claude-code-go](https://github.com/lancekrogers/claude-code-go).
