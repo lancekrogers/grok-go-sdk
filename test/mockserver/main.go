@@ -227,22 +227,108 @@ func doAgent(args []string) int {
 func doAgentStdio() int {
 	sc := bufio.NewScanner(os.Stdin)
 	sc.Buffer(make([]byte, 64*1024), 1024*1024)
+	var sessionCounter int
 	for sc.Scan() {
 		line := sc.Bytes()
 		var m map[string]any
 		if err := json.Unmarshal(line, &m); err != nil {
 			continue
 		}
-		if t, _ := m["type"].(string); t == "shutdown" {
-			return 0
+		method, _ := m["method"].(string)
+		id, hasID := m["id"]
+		if method == "" || !hasID {
+			continue
 		}
-		if id, ok := m["id"].(string); ok && id != "" {
-			resp := map[string]any{"type": "response", "id": id, "text": m["text"]}
-			b, _ := json.Marshal(resp)
-			os.Stdout.Write(append(b, '\n'))
+		switch method {
+		case "initialize":
+			writeJSON(map[string]any{
+				"jsonrpc": "2.0",
+				"id":      id,
+				"result": map[string]any{
+					"protocolVersion": 1,
+					"agentCapabilities": map[string]any{
+						"loadSession":        true,
+						"promptCapabilities": map[string]bool{"image": false, "audio": false, "embeddedContext": true},
+						"mcpCapabilities":    map[string]bool{"http": true, "sse": true},
+					},
+					"authMethods": []map[string]any{
+						{"id": "cached_token", "name": "cached_token", "description": "Cached token"},
+					},
+				},
+			})
+		case "authenticate":
+			writeJSON(map[string]any{
+				"jsonrpc": "2.0",
+				"id":      id,
+				"result":  map[string]any{"_meta": map[string]any{"email": "mock@example.invalid", "auth_mode": "mock"}},
+			})
+		case "session/new":
+			sessionCounter++
+			sessID := fmt.Sprintf("mock-session-%08d", sessionCounter)
+			writeJSON(map[string]any{
+				"jsonrpc": "2.0",
+				"id":      id,
+				"result":  map[string]any{"sessionId": sessID},
+			})
+		case "session/prompt":
+			params, _ := m["params"].(map[string]any)
+			sessID, _ := params["sessionId"].(string)
+			promptBlocks, _ := params["prompt"].([]any)
+			var promptText string
+			for _, b := range promptBlocks {
+				if bb, ok := b.(map[string]any); ok {
+					if t, _ := bb["text"].(string); t != "" {
+						promptText += t
+					}
+				}
+			}
+			emitStreamingChunks(sessID, "Mock response to: "+promptText)
+			writeJSON(map[string]any{
+				"jsonrpc": "2.0",
+				"id":      id,
+				"result": map[string]any{
+					"stopReason": "end_turn",
+					"_meta": map[string]any{
+						"sessionId":    sessID,
+						"requestId":    fmt.Sprintf("mock-req-%08d", sessionCounter),
+						"promptId":     fmt.Sprintf("mock-prompt-%08d", sessionCounter),
+						"modelId":      "grok-mock",
+						"totalTokens":  100,
+						"inputTokens":  60,
+						"outputTokens": 40,
+					},
+				},
+			})
+		default:
+			writeJSON(map[string]any{
+				"jsonrpc": "2.0",
+				"id":      id,
+				"error":   map[string]any{"code": -32601, "message": "Method not found"},
+			})
 		}
 	}
 	return 0
+}
+
+func emitStreamingChunks(sessID, text string) {
+	for _, word := range strings.Fields(text) {
+		writeJSON(map[string]any{
+			"jsonrpc": "2.0",
+			"method":  "session/update",
+			"params": map[string]any{
+				"sessionId": sessID,
+				"update": map[string]any{
+					"sessionUpdate": "agent_message_chunk",
+					"content":       map[string]string{"type": "text", "text": word + " "},
+				},
+			},
+		})
+	}
+}
+
+func writeJSON(v any) {
+	b, _ := json.Marshal(v)
+	os.Stdout.Write(append(b, '\n'))
 }
 
 func doAgentServe(args []string) int {

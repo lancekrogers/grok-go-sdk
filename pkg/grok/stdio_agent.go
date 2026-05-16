@@ -5,127 +5,46 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os/exec"
+	"strconv"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
 
-type AgentMessage struct {
-	Type    string          `json:"type"`
-	ID      string          `json:"id,omitempty"`
-	Text    string          `json:"text,omitempty"`
-	Payload json.RawMessage `json:"payload,omitempty"`
-	Raw     json.RawMessage `json:"-"`
-}
-
 type StdioConfig struct {
-	Model               string
-	ReasoningEffort     string
-	AlwaysApprove       bool
-	AgentProfile        string
-	UseLeader           bool
-	NoLeader            bool
-	GrokWSOrigin        string
-	GrokWSURL           string
-	CLIChatProxyBaseURL string
-	XAIAPIBaseURL       string
-	Env                 []string
+	Env []string
+
+	ClientName    string
+	ClientVersion string
 }
 
 type StdioSession struct {
-	cmd           *exec.Cmd
-	stdin         io.WriteCloser
-	stdout        io.ReadCloser
-	writeMu       sync.Mutex
-	messages      chan AgentMessage
-	errs          chan error
-	closed        chan struct{}
-	receiveCalled chan struct{}
-	closeOnce     sync.Once
-	shutdownOnce  sync.Once
-	pending       *pendingTable
-}
+	cmd    *exec.Cmd
+	stdin  io.WriteCloser
+	stdout io.ReadCloser
 
-type pendingTable struct {
-	mu      sync.Mutex
-	waiters map[string]chan AgentMessage
-}
+	writeMu sync.Mutex
+	nextID  atomic.Int64
 
-func newPendingTable() *pendingTable {
-	return &pendingTable{waiters: make(map[string]chan AgentMessage)}
-}
+	pending   sync.Map
+	updatesCh chan SessionUpdate
+	notifCh   chan RPCMessage
+	errsCh    chan error
+	closed    chan struct{}
 
-func (p *pendingTable) register(id string) chan AgentMessage {
-	ch := make(chan AgentMessage, 1)
-	p.mu.Lock()
-	p.waiters[id] = ch
-	p.mu.Unlock()
-	return ch
-}
-
-func (p *pendingTable) deliver(m AgentMessage) bool {
-	if m.ID == "" {
-		return false
-	}
-	p.mu.Lock()
-	ch, ok := p.waiters[m.ID]
-	if ok {
-		delete(p.waiters, m.ID)
-	}
-	p.mu.Unlock()
-	if !ok {
-		return false
-	}
-	ch <- m
-	return true
-}
-
-func (p *pendingTable) drop(id string) {
-	p.mu.Lock()
-	delete(p.waiters, id)
-	p.mu.Unlock()
+	closeOnce    sync.Once
+	shutdownOnce sync.Once
 }
 
 func (c *GrokClient) StartStdioAgent(ctx context.Context, cfg *StdioConfig) (*StdioSession, error) {
 	if cfg == nil {
 		cfg = &StdioConfig{}
 	}
-	head := []string{}
-	if cfg.Model != "" {
-		head = append(head, "--model", cfg.Model)
-	}
-	if cfg.ReasoningEffort != "" {
-		head = append(head, "--reasoning-effort", cfg.ReasoningEffort)
-	}
-	if cfg.AlwaysApprove {
-		head = append(head, "--always-approve")
-	}
-	if cfg.AgentProfile != "" {
-		head = append(head, "--agent-profile", cfg.AgentProfile)
-	}
-	if cfg.UseLeader {
-		head = append(head, "--leader")
-	}
-	if cfg.NoLeader {
-		head = append(head, "--no-leader")
-	}
-	if cfg.GrokWSOrigin != "" {
-		head = append(head, "--grok-ws-origin", cfg.GrokWSOrigin)
-	}
-	if cfg.GrokWSURL != "" {
-		head = append(head, "--grok-ws-url", cfg.GrokWSURL)
-	}
-	if cfg.CLIChatProxyBaseURL != "" {
-		head = append(head, "--cli-chat-proxy-base-url", cfg.CLIChatProxyBaseURL)
-	}
-	if cfg.XAIAPIBaseURL != "" {
-		head = append(head, "--xai-api-base-url", cfg.XAIAPIBaseURL)
-	}
-	args := append(head, "agent", "stdio")
-
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := execCommand(ctx, c.BinPath, "agent", "stdio")
 	cmd.Env = c.envBase(cfg.Env)
 
 	stdin, err := cmd.StdinPipe()
@@ -141,17 +60,143 @@ func (c *GrokClient) StartStdioAgent(ctx context.Context, cfg *StdioConfig) (*St
 	}
 
 	s := &StdioSession{
-		cmd:           cmd,
-		stdin:         stdin,
-		stdout:        stdout,
-		messages:      make(chan AgentMessage, 16),
-		errs:          make(chan error, 4),
-		closed:        make(chan struct{}),
-		receiveCalled: make(chan struct{}, 1),
-		pending:       newPendingTable(),
+		cmd:       cmd,
+		stdin:     stdin,
+		stdout:    stdout,
+		updatesCh: make(chan SessionUpdate, 64),
+		notifCh:   make(chan RPCMessage, 32),
+		errsCh:    make(chan error, 4),
+		closed:    make(chan struct{}),
 	}
 	go s.readLoop()
 	return s, nil
+}
+
+func (s *StdioSession) Updates() <-chan SessionUpdate { return s.updatesCh }
+
+func (s *StdioSession) Notifications() <-chan RPCMessage { return s.notifCh }
+
+func (s *StdioSession) Errors() <-chan error { return s.errsCh }
+
+func (s *StdioSession) Done() <-chan struct{} { return s.closed }
+
+func (s *StdioSession) Call(ctx context.Context, method string, params any, result any) error {
+	id := s.nextID.Add(1)
+	idJSON, _ := json.Marshal(id)
+	idStr := strconv.FormatInt(id, 10)
+
+	ch := make(chan *RPCMessage, 1)
+	s.pending.Store(idStr, ch)
+	defer s.pending.Delete(idStr)
+
+	var paramsRaw json.RawMessage
+	if params != nil {
+		b, err := json.Marshal(params)
+		if err != nil {
+			return fmt.Errorf("marshal params: %w", err)
+		}
+		paramsRaw = b
+	}
+
+	msg := RPCMessage{
+		JSONRPC: "2.0",
+		ID:      idJSON,
+		Method:  method,
+		Params:  paramsRaw,
+	}
+	if err := s.writeMessage(&msg); err != nil {
+		return err
+	}
+
+	select {
+	case resp := <-ch:
+		if resp.Error != nil {
+			return resp.Error
+		}
+		if result != nil && len(resp.Result) > 0 {
+			if err := json.Unmarshal(resp.Result, result); err != nil {
+				return fmt.Errorf("unmarshal result for %s: %w", method, err)
+			}
+		}
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-s.closed:
+		return errors.New("stdio session closed before response")
+	}
+}
+
+func (s *StdioSession) Notify(method string, params any) error {
+	var paramsRaw json.RawMessage
+	if params != nil {
+		b, err := json.Marshal(params)
+		if err != nil {
+			return err
+		}
+		paramsRaw = b
+	}
+	return s.writeMessage(&RPCMessage{JSONRPC: "2.0", Method: method, Params: paramsRaw})
+}
+
+func (s *StdioSession) writeMessage(m *RPCMessage) error {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	b = append(b, '\n')
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	_, err = s.stdin.Write(b)
+	return err
+}
+
+func (s *StdioSession) Initialize(ctx context.Context, clientName, clientVersion string) (*InitializeResult, error) {
+	if clientName == "" {
+		clientName = "grok-go-sdk"
+	}
+	if clientVersion == "" {
+		clientVersion = "0.1.0"
+	}
+	var r InitializeResult
+	err := s.Call(ctx, "initialize", InitializeParams{
+		ProtocolVersion: acpProtocolVersion,
+		ClientInfo:      ClientInfo{Name: clientName, Version: clientVersion},
+	}, &r)
+	if err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (s *StdioSession) Authenticate(ctx context.Context, methodID string) (*AuthenticateResult, error) {
+	var r AuthenticateResult
+	if err := s.Call(ctx, "authenticate", AuthenticateParams{MethodID: methodID}, &r); err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (s *StdioSession) NewSession(ctx context.Context, cwd string, mcpServers []MCPServerSpec) (string, error) {
+	if mcpServers == nil {
+		mcpServers = []MCPServerSpec{}
+	}
+	var r NewSessionResult
+	if err := s.Call(ctx, "session/new", NewSessionParams{CWD: cwd, MCPServers: mcpServers}, &r); err != nil {
+		return "", err
+	}
+	return r.SessionID, nil
+}
+
+func (s *StdioSession) Prompt(ctx context.Context, sessionID string, blocks []PromptBlock) (*PromptResult, error) {
+	var r PromptResult
+	if err := s.Call(ctx, "session/prompt", PromptParams{SessionID: sessionID, Prompt: blocks}, &r); err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (s *StdioSession) PromptText(ctx context.Context, sessionID, text string) (*PromptResult, error) {
+	return s.Prompt(ctx, sessionID, []PromptBlock{TextBlock(text)})
 }
 
 func (s *StdioSession) readLoop() {
@@ -159,83 +204,96 @@ func (s *StdioSession) readLoop() {
 	sc := bufio.NewScanner(s.stdout)
 	sc.Buffer(make([]byte, 64*1024), 1024*1024)
 	for sc.Scan() {
-		line := sc.Bytes()
+		line := append([]byte(nil), sc.Bytes()...)
 		if len(line) == 0 {
 			continue
 		}
-		var m AgentMessage
+		var m RPCMessage
 		if err := json.Unmarshal(line, &m); err != nil {
-			select {
-			case s.errs <- err:
-			case <-s.closed:
-				return
-			}
+			s.sendErr(fmt.Errorf("decode rpc message: %w (line=%s)", err, truncate(line, 200)))
 			continue
 		}
-		m.Raw = append([]byte(nil), line...)
-		if s.pending.deliver(m) {
-			continue
-		}
-		select {
-		case s.messages <- m:
-		case <-s.closed:
-			return
+		m.Raw = line
+
+		switch {
+		case m.IsResponse():
+			s.deliverResponse(&m)
+		case m.IsRequest():
+			s.handleServerRequest(&m)
+		case m.IsNotification():
+			s.handleNotification(&m)
 		}
 	}
 	if err := sc.Err(); err != nil {
-		select {
-		case s.errs <- err:
-		case <-s.closed:
+		s.sendErr(fmt.Errorf("scanner: %w", err))
+	}
+}
+
+func (s *StdioSession) deliverResponse(m *RPCMessage) {
+	var idStr string
+	if err := json.Unmarshal(m.ID, &idStr); err != nil {
+		var idNum int64
+		if err := json.Unmarshal(m.ID, &idNum); err != nil {
+			return
+		}
+		idStr = strconv.FormatInt(idNum, 10)
+	}
+	v, ok := s.pending.LoadAndDelete(idStr)
+	if !ok {
+		return
+	}
+	ch := v.(chan *RPCMessage)
+	select {
+	case ch <- m:
+	default:
+	}
+}
+
+func (s *StdioSession) handleServerRequest(m *RPCMessage) {
+	resp := RPCMessage{
+		JSONRPC: "2.0",
+		ID:      m.ID,
+		Error: &RPCError{
+			Code:    -32601,
+			Message: "Method not found",
+		},
+	}
+	_ = s.writeMessage(&resp)
+}
+
+func (s *StdioSession) handleNotification(m *RPCMessage) {
+	if m.Method == "session/update" && len(m.Params) > 0 {
+		var su SessionUpdate
+		if err := json.Unmarshal(m.Params, &su); err == nil {
+			su.Raw = m.Params
+			su.Update.Raw = m.Params
+			select {
+			case s.updatesCh <- su:
+			case <-s.closed:
+				return
+			default:
+			}
+			return
 		}
 	}
-}
-
-func (s *StdioSession) Send(m AgentMessage) error {
-	s.writeMu.Lock()
-	defer s.writeMu.Unlock()
-	b, err := json.Marshal(m)
-	if err != nil {
-		return err
-	}
-	b = append(b, '\n')
-	_, err = s.stdin.Write(b)
-	return err
-}
-
-func (s *StdioSession) Receive() (<-chan AgentMessage, <-chan error) {
 	select {
-	case s.receiveCalled <- struct{}{}:
-		return s.messages, s.errs
-	default:
-		panic("Receive called more than once")
-	}
-}
-
-func (s *StdioSession) RequestResponse(ctx context.Context, msg AgentMessage) (AgentMessage, error) {
-	if msg.ID == "" {
-		msg.ID = GenerateSessionID()
-	}
-	ch := s.pending.register(msg.ID)
-	if err := s.Send(msg); err != nil {
-		s.pending.drop(msg.ID)
-		return AgentMessage{}, err
-	}
-	select {
-	case resp := <-ch:
-		return resp, nil
-	case <-ctx.Done():
-		s.pending.drop(msg.ID)
-		return AgentMessage{}, ctx.Err()
+	case s.notifCh <- *m:
 	case <-s.closed:
-		s.pending.drop(msg.ID)
-		return AgentMessage{}, errors.New("stdio session closed before response")
+	default:
+	}
+}
+
+func (s *StdioSession) sendErr(err error) {
+	select {
+	case s.errsCh <- err:
+	case <-s.closed:
+	default:
 	}
 }
 
 func (s *StdioSession) Close() error {
 	var closeErr error
 	s.closeOnce.Do(func() {
-		_ = s.Send(AgentMessage{Type: "shutdown"})
 		_ = s.stdin.Close()
 		done := make(chan struct{})
 		go func() {
@@ -265,9 +323,15 @@ func (s *StdioSession) Close() error {
 func (s *StdioSession) shutdown() {
 	s.shutdownOnce.Do(func() {
 		close(s.closed)
-		close(s.messages)
-		close(s.errs)
+		close(s.updatesCh)
+		close(s.notifCh)
+		close(s.errsCh)
 	})
 }
 
-var ErrReceiveAlreadyCalled = errors.New("Receive already called once on this session")
+func truncate(b []byte, n int) string {
+	if len(b) <= n {
+		return string(b)
+	}
+	return string(b[:n]) + "..."
+}
