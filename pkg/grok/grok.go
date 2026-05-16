@@ -1,3 +1,280 @@
 package grok
 
-// TODO: implement grok.go
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+	"time"
+)
+
+var execCommand = exec.CommandContext
+
+type GrokClient struct {
+	BinPath        string
+	DefaultOptions *RunOptions
+	Env            []string
+	WorkingDir     string
+}
+
+func NewClient(binPath string) *GrokClient {
+	return &GrokClient{
+		BinPath:        binPath,
+		DefaultOptions: &RunOptions{Format: PlainOutput},
+	}
+}
+
+func NewClientFromPath() (*GrokClient, error) {
+	p, err := LocateBinary()
+	if err != nil {
+		return nil, err
+	}
+	return NewClient(p), nil
+}
+
+func (c *GrokClient) RunPrompt(prompt string, opts *RunOptions) (*GrokResult, error) {
+	return c.RunPromptCtx(context.Background(), prompt, opts)
+}
+
+func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunOptions) (*GrokResult, error) {
+	prepared, err := c.prepareOptions(opts)
+	if err != nil {
+		return nil, err
+	}
+	if prepared.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, prepared.Timeout)
+		defer cancel()
+	}
+	args := BuildArgs(prompt, prepared)
+	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd.Dir = c.workDir(prepared)
+	cmd.Env = c.envFor(prepared)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		exitCode := 1
+		if ee, ok := err.(*exec.ExitError); ok {
+			exitCode = ee.ExitCode()
+		}
+		ge := ParseError(stderr.String(), exitCode)
+		ge.Original = err
+		return nil, ge
+	}
+	return decodeOutput(prepared.Format, stdout.Bytes())
+}
+
+func (c *GrokClient) runSubcommand(ctx context.Context, args []string) ([]byte, error) {
+	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd.Dir = c.WorkingDir
+	cmd.Env = c.envBase(nil)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		exitCode := 1
+		if ee, ok := err.(*exec.ExitError); ok {
+			exitCode = ee.ExitCode()
+		}
+		ge := ParseError(stderr.String(), exitCode)
+		ge.Original = err
+		return nil, ge
+	}
+	return stdout.Bytes(), nil
+}
+
+func (c *GrokClient) prepareOptions(opts *RunOptions) (*RunOptions, error) {
+	if opts == nil {
+		opts = c.DefaultOptions
+	}
+	prepared := cloneRunOptions(opts)
+	if err := PreprocessOptions(prepared); err != nil {
+		return nil, err
+	}
+	return prepared, nil
+}
+
+func (c *GrokClient) workDir(opts *RunOptions) string {
+	if opts != nil && opts.WorkingDirectory != "" {
+		return opts.WorkingDirectory
+	}
+	return c.WorkingDir
+}
+
+func (c *GrokClient) envBase(extra []string) []string {
+	base := append([]string(nil), os.Environ()...)
+	base = append(base, c.Env...)
+	base = append(base, extra...)
+	return base
+}
+
+func (c *GrokClient) envFor(opts *RunOptions) []string {
+	if opts == nil {
+		return c.envBase(nil)
+	}
+	return c.envBase(opts.Env)
+}
+
+func decodeOutput(format OutputFormat, data []byte) (*GrokResult, error) {
+	if format == JSONOutput {
+		var r GrokResult
+		if err := json.Unmarshal(data, &r); err != nil {
+			return nil, &GrokError{Type: ErrorValidation, Message: "decode: " + err.Error()}
+		}
+		return &r, nil
+	}
+	return &GrokResult{Text: string(data)}, nil
+}
+
+func BuildArgs(prompt string, opts *RunOptions) []string {
+	args := []string{}
+
+	switch {
+	case opts.PromptFile != "":
+		args = append(args, "--prompt-file", opts.PromptFile)
+	case opts.PromptJSON != "":
+		args = append(args, "--prompt-json", opts.PromptJSON)
+	case prompt != "":
+		args = append(args, "-p", prompt)
+	case opts.Prompt != "":
+		args = append(args, "-p", opts.Prompt)
+	}
+
+	if opts.Format != "" {
+		args = append(args, "--output-format", string(opts.Format))
+	}
+	if opts.InputFormat != "" {
+		args = append(args, "--input-format", string(opts.InputFormat))
+	}
+
+	if opts.Agent != "" {
+		args = append(args, "--agent", opts.Agent)
+	} else if opts.AgentDefinitionFile != "" {
+		args = append(args, "--agent", opts.AgentDefinitionFile)
+	}
+	if opts.AgentsJSON != "" {
+		args = append(args, "--agents", opts.AgentsJSON)
+	} else if len(opts.Agents) > 0 {
+		if b, err := json.Marshal(opts.Agents); err == nil {
+			args = append(args, "--agents", string(b))
+		}
+	}
+	if opts.NoSubagents {
+		args = append(args, "--no-subagents")
+	}
+
+	for _, r := range opts.AllowRules {
+		args = append(args, "--allow", r)
+	}
+	for _, r := range opts.DenyRules {
+		args = append(args, "--deny", r)
+	}
+	if len(opts.AllowedTools) > 0 {
+		args = append(args, "--tools", strings.Join(opts.AllowedTools, ","))
+	}
+	if len(opts.DisallowedTools) > 0 {
+		args = append(args, "--disallowed-tools", strings.Join(opts.DisallowedTools, ","))
+	}
+	if opts.DisableWebSearch {
+		args = append(args, "--disable-web-search")
+	}
+	if opts.AlwaysApprove {
+		args = append(args, "--always-approve")
+	}
+	if opts.PermissionMode != "" {
+		args = append(args, "--permission-mode", string(opts.PermissionMode))
+	}
+
+	if opts.SandboxProfile != "" {
+		args = append(args, "--sandbox", opts.SandboxProfile)
+	}
+
+	if opts.ResumeID != "" {
+		args = append(args, "--resume", opts.ResumeID)
+	} else if opts.Continue {
+		args = append(args, "--continue")
+	}
+	if opts.RestoreCode {
+		args = append(args, "--restore-code")
+	}
+
+	if opts.NoMemory {
+		args = append(args, "--no-memory")
+	}
+	if opts.ExperimentalMemory {
+		args = append(args, "--experimental-memory")
+	}
+
+	if opts.WorkingDirectory != "" {
+		args = append(args, "--cwd", opts.WorkingDirectory)
+	}
+	if opts.Worktree.Enabled {
+		if opts.Worktree.Name != "" {
+			args = append(args, "-w", opts.Worktree.Name)
+		} else {
+			args = append(args, "-w")
+		}
+	}
+
+	if opts.Model != "" {
+		args = append(args, "--model", opts.Model)
+	}
+	if opts.Effort != "" {
+		args = append(args, "--effort", string(opts.Effort))
+	}
+	if opts.ReasoningEffort != "" {
+		args = append(args, "--reasoning-effort", opts.ReasoningEffort)
+	}
+
+	if opts.MaxTurns > 0 {
+		args = append(args, "--max-turns", strconv.Itoa(opts.MaxTurns))
+	}
+	if opts.BestOfN > 0 {
+		args = append(args, "--best-of-n", strconv.Itoa(opts.BestOfN))
+	}
+	if opts.Check {
+		args = append(args, "--check")
+	}
+	if opts.NoPlan {
+		args = append(args, "--no-plan")
+	}
+	if opts.NoAltScreen {
+		args = append(args, "--no-alt-screen")
+	}
+
+	if opts.SystemPromptOverride != "" {
+		args = append(args, "--system-prompt-override", opts.SystemPromptOverride)
+	}
+	if opts.RulesFile != "" {
+		args = append(args, "--rules", "@"+opts.RulesFile)
+	} else if opts.Rules != "" {
+		args = append(args, "--rules", opts.Rules)
+	}
+	if opts.Verbatim {
+		args = append(args, "--verbatim")
+	}
+
+	for _, mc := range opts.MCPConfigs {
+		args = append(args, "--mcp-config", mc)
+	}
+	if opts.MCPConfigPath != "" && len(opts.MCPConfigs) == 0 {
+		args = append(args, "--mcp-config", opts.MCPConfigPath)
+	}
+	if opts.StrictMCPConfig {
+		args = append(args, "--strict-mcp-config")
+	}
+
+	if opts.OAuth {
+		args = append(args, "--oauth")
+	}
+
+	return args
+}
+
+func init() {
+	_ = time.Now
+}
