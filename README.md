@@ -1,5 +1,11 @@
 <h1 align="center">Grok Go SDK</h1>
 
+<p align="center">
+  <a href="https://github.com/lancekrogers/grok-go-sdk/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lancekrogers/grok-go-sdk/ci.yml?label=CI"></a>
+  <a href="https://pkg.go.dev/github.com/lancekrogers/grok-go-sdk"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/lancekrogers/grok-go-sdk.svg"></a>
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
+</p>
+
 A Go library for programmatically integrating the [grok](https://github.com/xai-org/grok)
 CLI into Go applications. Wraps the headless and stdio-agent surfaces of the
 `grok` binary so Go programs can drive Grok Build sessions, stream output,
@@ -8,29 +14,247 @@ retry policies.
 
 > This SDK is in early development. Public API is unstable until `v1.0`.
 
-## Status
+## Highlights
 
-- Repository: private during initial development.
-- License: MIT.
-- Captured `grok` CLI snapshot: `grok 0.1.210 (8b63e9068c)`.
+- Idiomatic Go wrapper for every `grok` subcommand we ship today.
+- Streaming, stdio-agent, sessions, MCP, worktree, admin commands.
+- Plugin manager with logging, metrics, audit, and tool-filter hooks.
+- Budget tracker with warning and exceeded callbacks.
+- Retry policy with exponential backoff and rate-limit honor.
+- `pkg/grok/dangerous` for opt-in unsafe operations behind an env guard.
+
+## Features
+
+### Core
+- `RunPrompt` / `RunPromptCtx`: single-shot prompts with `json` or `plain`.
+- `StreamPrompt`: newline-delimited event channel with goleak-clean cancel.
+- `RunFromStdin` / `RunFromStdinCtx`: pipe arbitrary stdin into grok.
+- Session helpers: `GenerateSessionID` (UUID v7), `Continue`, `Resume`.
+
+### Advanced
+- `StartStdioAgent`: full-duplex JSON-RPC-style session with `RequestResponse`.
+- `RunHeadlessAgent`, `StartServeAgent`, `LeaderList`/`Info`/`Kill`/`Profile*`.
+- Admin subcommand wrappers: `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Inspect`, `Models`, `Share`, `Trace`, `Import`, `SessionsList`/`Search`.
+- Permission rule validation + built-in tool name constants.
+- Sandbox-profile resolution + permissive heuristic.
+- Subagent JSON marshaling.
+
+### Developer Experience
+- `PluginManager` with `OnBeforeRun` and `OnAfterRun` hooks.
+- Four built-in plugins: `LoggingPlugin`, `MetricsPlugin`, `AuditPlugin`, `ToolFilterPlugin`.
+- `BudgetTracker` with warning/exceeded callbacks.
+- `RetryPolicy` with backoff, jitter, and rate-limit honor.
+
+## Installation
+
+```
+go get github.com/lancekrogers/grok-go-sdk@latest
+```
+
+## Quick Start
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/lancekrogers/grok-go-sdk/pkg/grok"
+)
+
+func main() {
+	c, err := grok.NewClientFromPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+	res, err := c.RunPrompt("Write a one-line Go function that returns 42", &grok.RunOptions{
+		Format: grok.JSONOutput,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(res.Text)
+}
+```
 
 ## Prerequisites
 
 - Go (latest stable; this module targets `go1.26.1`).
-- The [grok CLI](https://github.com/xai-org/grok) installed and authenticated.
+- The [grok CLI](https://github.com/xai-org/grok) installed and authenticated via `grok login`.
+- xAI API access for the real-binary lane (mock binary works offline).
 - [just](https://github.com/casey/just) for running project commands.
 
-## Quick Start
+## Interactive Demos
+
+Every example under `examples/` is runnable. See [docs/DEMOS.md](docs/DEMOS.md)
+for the full list. Common starting points:
 
 ```
-just              # list top-level recipes
-just build all    # build the library + examples
-just test all     # run unit tests
-just lint         # fmt + vet
+just demo basic
+just demo streaming
+just demo sessions
+just demo agent-stdio
 ```
 
-Full recipe surface is documented dynamically by `just --list`.
+## Core Features
+
+### Basic prompts
+
+```go
+res, err := c.RunPrompt("Hello", &grok.RunOptions{Format: grok.JSONOutput})
+```
+
+### Streaming
+
+```go
+events, errs := c.StreamPrompt(ctx, "Explain Go channels", &grok.RunOptions{})
+for ev := range events {
+	fmt.Print(ev.Text)
+}
+```
+
+### Sessions
+
+```go
+first, _ := c.RunPromptCtx(ctx, "Remember the number 42.", opts)
+again, _ := c.ResumeConversationCtx(ctx, "What number?", first.SessionID)
+```
+
+### MCP
+
+```go
+servers, _ := c.MCPList(ctx)
+report, _ := c.MCPDoctor(ctx)
+```
+
+## Advanced Features
+
+### Plugins
+
+```go
+pm := grok.NewPluginManager()
+pm.Register(&grok.LoggingPlugin{SanitizeSecrets: true}, nil)
+pm.Register(&grok.MetricsPlugin{}, nil)
+opts := &grok.RunOptions{PluginManager: pm}
+```
+
+### Budget tracking
+
+```go
+bt := grok.NewBudgetTracker(&grok.BudgetConfig{MaxBudgetUSD: 5.00, WarningThreshold: 0.8})
+opts := &grok.RunOptions{BudgetTracker: bt}
+```
+
+### Subagents
+
+```go
+opts := &grok.RunOptions{
+	Agent:  "security",
+	Agents: map[string]*grok.SubagentConfig{
+		"security": {Description: "...", Prompt: "...", Tools: []string{grok.ToolRead}},
+	},
+}
+```
+
+### Retry
+
+```go
+res, err := c.RunPromptWithRetryCtx(ctx, "hello", opts, grok.DefaultRetryPolicy())
+```
+
+### Permissions
+
+```go
+opts := &grok.RunOptions{
+	AllowRules: []string{grok.BuildToolGlob(grok.ToolBash, "git status*")},
+	DenyRules:  []string{grok.BuildToolGlob(grok.ToolWebFetch, "*")},
+}
+```
+
+## API Reference
+
+### RunOptions (selected)
+
+| Field | Purpose |
+|-------|---------|
+| `Format` | `JSONOutput`, `StreamingJSONOutput`, `PlainOutput` |
+| `InputFormat` | `TextInput`, `StreamJSONInput` |
+| `Model` | model identifier (e.g. `grok-build`) |
+| `WorkingDirectory` | overrides the spawned `grok` process cwd |
+| `Timeout` | per-call timeout (uses `context.WithTimeout`) |
+| `Continue`, `ResumeID` | session controls |
+| `Agent`, `Agents` | subagent selection + inline definitions |
+| `AllowRules`, `DenyRules` | permission rule lists |
+| `BudgetTracker`, `PluginManager` | run-time hooks |
+| `MaxBudgetUSD` | per-call budget cap |
+| `Worktree` | `-w` worktree enablement + name |
+| `SandboxProfile` | sandbox profile name |
+| `Check`, `BestOfN` | self-verification + n-way race |
+| `AllowDangerousMode` | opt-in for bypass-permissions or always-approve |
+
+### Core methods
+
+| Method | Purpose |
+|--------|---------|
+| `NewClient`, `NewClientFromPath` | construct a `*GrokClient` |
+| `RunPrompt`, `RunPromptCtx` | single-shot prompt |
+| `StreamPrompt` | streaming events |
+| `RunFromStdin`, `RunFromStdinCtx` | pipe stdin into grok |
+| `StartStdioAgent` | long-lived agent session |
+| `RunPromptWithRetry*` | retry-wrapped single-shot |
+| `ContinueConversation*`, `ResumeConversation*` | session helpers |
+| `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Inspect`, `Models`, `Share`, `Trace`, `Import`, `Sessions*`, `Leader*` | admin wrappers |
+
+## Security-Sensitive Features
+
+The `pkg/grok/dangerous` subpackage exposes operations that weaken safety
+controls (bypass permissions, disable sandbox, auto-approve all tool calls).
+They require explicit opt-in:
+
+```
+export GROK_ENABLE_DANGEROUS="i-accept-all-risks"
+```
+
+`NewDangerousClient` returns an error if the env var is missing or if
+`GO_ENV` or `NODE_ENV` is `production`. See
+[pkg/grok/dangerous/README.md](pkg/grok/dangerous/README.md).
+
+## Testing
+
+```
+just test           # all unit tests
+just test integration  # integration tests against the mock binary
+INTEGRATION_REAL=1 just test integration  # real-binary lane
+```
+
+## Development
+
+```
+just build all      # library + examples + mock
+just lint           # fmt + vet
+just mock build     # rebuild the test mock binary
+just demo basic     # run an example
+```
+
+## Documentation
+
+- [docs/DEMOS.md](docs/DEMOS.md) - every example
+- [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md) - every flag the SDK emits
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - subprocess/IPC architecture
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - dev environment + PR norms
+- [docs/RELEASE_NOTES_v0.1.0.md](docs/RELEASE_NOTES_v0.1.0.md) - changelog
+
+## Contributing
+
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Acknowledgments
+
+Built on top of the [grok CLI](https://github.com/xai-org/grok) by xAI.
+The shape of this SDK was informed by Lance Rogers' earlier
+[claude-code-go](https://github.com/lancekrogers/claude-code-go).
