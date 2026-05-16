@@ -1,0 +1,4 @@
+captured: 2026-05-16
+binary: grok 0.1.210 (8b63e9068c)
+prompt: "say hello"
+event types observed: thought, text, end

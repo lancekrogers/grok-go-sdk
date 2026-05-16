@@ -1,0 +1,6 @@
+captured: 2026-05-16
+binary: grok 0.1.210 (8b63e9068c)
+prompt: "List the files in the current directory using ls"
+flags: --allow Bash(ls *) --permission-mode auto
+event types observed: thought, text, end
+note: model did not invoke a tool for this prompt; capture nonetheless preserved as a baseline. No tool/tool_result/permission_request events emitted by grok 0.1.210 in this run.

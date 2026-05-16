@@ -1,0 +1,164 @@
+{"type":"thought","data":"The"}
+{"type":"thought","data":" user"}
+{"type":"thought","data":" wants"}
+{"type":"thought","data":" me"}
+{"type":"thought","data":" to"}
+{"type":"thought","data":" list"}
+{"type":"thought","data":" the"}
+{"type":"thought","data":" files"}
+{"type":"thought","data":" in"}
+{"type":"thought","data":" the"}
+{"type":"thought","data":" current"}
+{"type":"thought","data":" directory"}
+{"type":"thought","data":" using"}
+{"type":"thought","data":" `"}
+{"type":"thought","data":"ls"}
+{"type":"thought","data":"`."}
+{"type":"thought","data":" \n"}
+{"type":"thought","data":"The"}
+{"type":"thought","data":" `"}
+{"type":"thought","data":"ls"}
+{"type":"thought","data":"`"}
+{"type":"thought","data":" command"}
+{"type":"thought","data":" executed"}
+{"type":"thought","data":" successfully"}
+{"type":"thought","data":"."}
+{"type":"thought","data":" The"}
+{"type":"thought","data":" output"}
+{"type":"thought","data":" shows"}
+{"type":"thought","data":" the"}
+{"type":"thought","data":" files"}
+{"type":"thought","data":" and"}
+{"type":"thought","data":" directories"}
+{"type":"thought","data":" in"}
+{"type":"thought","data":" the"}
+{"type":"thought","data":" current"}
+{"type":"thought","data":" directory"}
+{"type":"thought","data":":\n"}
+{"type":"text","data":"Here's"}
+{"type":"text","data":" the"}
+{"type":"text","data":" output"}
+{"type":"text","data":" from"}
+{"type":"text","data":" `"}
+{"type":"text","data":"ls"}
+{"type":"text","data":"`"}
+{"type":"text","data":" in"}
+{"type":"text","data":" the"}
+{"type":"text","data":" current"}
+{"type":"text","data":" directory"}
+{"type":"text","data":" (`"}
+{"type":"text","data":"/"}
+{"type":"text","data":"Users"}
+{"type":"text","data":"/l"}
+{"type":"text","data":"ancer"}
+{"type":"text","data":"og"}
+{"type":"text","data":"ers"}
+{"type":"text","data":"/"}
+{"type":"text","data":"Dev"}
+{"type":"text","data":"/A"}
+{"type":"text","data":"I"}
+{"type":"text","data":"/ob"}
+{"type":"text","data":"ey"}
+{"type":"text","data":"-c"}
+{"type":"text","data":"ampaign"}
+{"type":"text","data":"/projects"}
+{"type":"text","data":"/g"}
+{"type":"text","data":"rok"}
+{"type":"text","data":"-go"}
+{"type":"text","data":"-sdk"}
+{"type":"text","data":"`"}
+{"type":"text","data":"):\n\n"}
+{"type":"text","data":"```\n"}
+{"type":"text","data":"AG"}
+{"type":"text","data":"ENTS"}
+{"type":"text","data":".md"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"LICENSE"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"README"}
+{"type":"text","data":".md"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"docs"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"examples"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"go"}
+{"type":"text","data":".mod"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"go"}
+{"type":"text","data":".sum"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"just"}
+{"type":"text","data":"file"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"mock"}
+{"type":"text","data":"server"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"pkg"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"test"}
+{"type":"text","data":"\n"}
+{"type":"text","data":"```\n\n"}
+{"type":"text","data":"**"}
+{"type":"text","data":"Directories"}
+{"type":"text","data":":**\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"docs"}
+{"type":"text","data":"/"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"examples"}
+{"type":"text","data":"/"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"mock"}
+{"type":"text","data":"server"}
+{"type":"text","data":"/"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"pkg"}
+{"type":"text","data":"/"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"test"}
+{"type":"text","data":"/"}
+{"type":"text","data":"`\n\n"}
+{"type":"text","data":"**"}
+{"type":"text","data":"Files"}
+{"type":"text","data":":**\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"AG"}
+{"type":"text","data":"ENTS"}
+{"type":"text","data":".md"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"LICENSE"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"README"}
+{"type":"text","data":".md"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"go"}
+{"type":"text","data":".mod"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"go"}
+{"type":"text","data":".sum"}
+{"type":"text","data":"`\n"}
+{"type":"text","data":"-"}
+{"type":"text","data":" `"}
+{"type":"text","data":"just"}
+{"type":"text","data":"file"}
+{"type":"text","data":"`"}
+{"type":"end","stopReason":"EndTurn","sessionId":"019e3256-d38c-7611-ba5e-270335c1cca3","requestId":"ba1406f1-8cca-4604-be6d-3c0eac6a18cc"}

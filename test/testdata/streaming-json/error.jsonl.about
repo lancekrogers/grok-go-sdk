@@ -1,0 +1,6 @@
+captured: 2026-05-16
+binary: grok 0.1.210 (8b63e9068c)
+prompt: "test"
+flags: --model nonexistent-model-xyz
+event types observed: error
+note: invalid --model forces grok to emit a single error event and exit non-zero
