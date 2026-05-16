@@ -1,6 +1,12 @@
 package grok
 
-import "testing"
+import (
+	"context"
+	"testing"
+	"time"
+
+	"go.uber.org/goleak"
+)
 
 func TestParseEventLine_KnownTypes(t *testing.T) {
 	cases := []struct {
@@ -42,5 +48,53 @@ func TestParseEventLine_InvalidJSON(t *testing.T) {
 	_, err := parseEventLine([]byte(`not json`))
 	if err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+func TestStreamPrompt_AgainstMock(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+	mock := buildOrLocateMock(t)
+	c := NewClient(mock)
+	ctx := context.Background()
+	events, errs := c.StreamPrompt(ctx, "hello", &RunOptions{})
+	var got []Event
+	done := false
+	for !done {
+		select {
+		case ev, ok := <-events:
+			if !ok {
+				done = true
+				break
+			}
+			got = append(got, ev)
+		case err, ok := <-errs:
+			if !ok {
+				continue
+			}
+			if err != nil {
+				t.Fatalf("stream error: %v", err)
+			}
+		}
+	}
+	if len(got) == 0 {
+		t.Fatal("no events received")
+	}
+}
+
+func TestStreamPrompt_Cancellation_NoGoroutineLeak(t *testing.T) {
+	defer goleak.VerifyNone(t)
+	mock := buildOrLocateMock(t)
+	c := NewClient(mock)
+	ctx, cancel := context.WithCancel(context.Background())
+	events, errs := c.StreamPrompt(ctx, "hello", &RunOptions{})
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		cancel()
+	}()
+	for range events {
+	}
+	for range errs {
 	}
 }
