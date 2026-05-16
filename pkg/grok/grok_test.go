@@ -127,3 +127,25 @@ func TestRunSubcommand_AgainstMock(t *testing.T) {
 		t.Errorf("expected 'grok-build' in output, got %q", string(out))
 	}
 }
+
+func TestPrepareOptionsWithPrompt_CheckAndBestOfN(t *testing.T) {
+	c := NewClient("/nonexistent")
+
+	// Check with prompt via arg should succeed (the new WithPrompt injects for hasPrompt validation in PreprocessOptions)
+	_, err := c.prepareOptionsWithPrompt(&RunOptions{Check: true}, "Find the largest prime below 100.")
+	if err != nil {
+		t.Fatalf("Check with prompt arg should not error: %v", err)
+	}
+
+	// BestOfN too
+	_, err = c.prepareOptionsWithPrompt(&RunOptions{BestOfN: 3}, "hello")
+	if err != nil {
+		t.Fatalf("BestOfN with prompt arg should not error: %v", err)
+	}
+
+	// When prompt already in opts, still works and keeps it
+	_, err = c.prepareOptionsWithPrompt(&RunOptions{Check: true, Prompt: "pre-set"}, "")
+	if err != nil {
+		t.Fatalf("Check with pre-set Prompt should not error: %v", err)
+	}
+}

@@ -12,7 +12,7 @@ func (c *GrokClient) RunFromStdin(stdin io.Reader, prompt string, opts *RunOptio
 }
 
 func (c *GrokClient) RunFromStdinCtx(ctx context.Context, stdin io.Reader, prompt string, opts *RunOptions) (*GrokResult, error) {
-	prepared, err := c.prepareOptions(opts)
+	prepared, err := c.prepareOptionsWithPrompt(opts, prompt)
 	if err != nil {
 		return nil, err
 	}

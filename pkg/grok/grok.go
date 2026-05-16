@@ -40,7 +40,7 @@ func (c *GrokClient) RunPrompt(prompt string, opts *RunOptions) (*GrokResult, er
 }
 
 func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunOptions) (*GrokResult, error) {
-	prepared, err := c.prepareOptions(opts)
+	prepared, err := c.prepareOptionsWithPrompt(opts, prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -135,12 +135,22 @@ func (c *GrokClient) runSubcommand(ctx context.Context, args []string) ([]byte, 
 }
 
 func (c *GrokClient) prepareOptions(opts *RunOptions) (*RunOptions, error) {
+	return c.prepareOptionsWithPrompt(opts, "")
+}
+
+func (c *GrokClient) prepareOptionsWithPrompt(opts *RunOptions, prompt string) (*RunOptions, error) {
 	if opts == nil {
 		opts = c.DefaultOptions
 	}
 	prepared := cloneRunOptions(opts)
+	if prompt != "" && prepared.Prompt == "" {
+		prepared.Prompt = prompt
+	}
 	if err := PreprocessOptions(prepared); err != nil {
 		return nil, err
+	}
+	if prompt != "" && prepared.Prompt == prompt {
+		prepared.Prompt = ""
 	}
 	return prepared, nil
 }

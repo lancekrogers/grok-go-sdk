@@ -77,7 +77,7 @@ func (c *GrokClient) StreamPrompt(ctx context.Context, prompt string, opts *RunO
 	events := make(chan Event, 16)
 	errs := make(chan error, 4)
 
-	prepared, err := c.prepareOptions(opts)
+	prepared, err := c.prepareOptionsWithPrompt(opts, prompt)
 	if err != nil {
 		errs <- err
 		close(events)
