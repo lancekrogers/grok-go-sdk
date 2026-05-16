@@ -19,10 +19,11 @@ func main() {
 		select {
 		case ev, ok := <-events:
 			if !ok {
+				fmt.Println()
 				return
 			}
-			if ev.Type == grok.EventAssistant || ev.Type == grok.EventDelta || ev.Type == "text" {
-				fmt.Print(ev.Text)
+			if ev.Type == grok.EventText {
+				fmt.Print(ev.Content())
 			}
 		case err, ok := <-errs:
 			if !ok {
