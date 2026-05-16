@@ -26,5 +26,11 @@ go.work.sum
 # Mock binary build output
 test/mockserver/bin/
 
+# Stray go-build artifacts if `go build ./test/mockserver` is run without -o
+# (the binary gets dumped at cwd named after the package dir)
+/mockserver
+/grok-mock
+/main
+
 # Trace exports
 trace-exports/
