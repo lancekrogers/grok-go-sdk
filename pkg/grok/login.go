@@ -1,3 +1,38 @@
 package grok
 
-// TODO: implement login.go
+import (
+	"context"
+	"os"
+	"os/exec"
+)
+
+type LoginMode int
+
+const (
+	LoginInteractive LoginMode = iota
+	LoginOAuth
+	LoginDevice
+)
+
+func (c *GrokClient) Login(ctx context.Context, mode LoginMode) error {
+	args := []string{"login"}
+	switch mode {
+	case LoginOAuth:
+		args = append(args, "--oauth")
+	case LoginDevice:
+		args = append(args, "--device-auth")
+	}
+	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		if ee, ok := err.(*exec.ExitError); ok {
+			ge := ParseError("", ee.ExitCode())
+			ge.Original = err
+			return ge
+		}
+		return err
+	}
+	return nil
+}
