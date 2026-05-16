@@ -1,0 +1,5 @@
+captured: 2026-05-16
+binary: grok 0.1.210/0.1.211 (8b63e9068c)
+prompt: initialize request
+envelope: JSON-RPC 2.0
+note: client sent {"jsonrpc":"2.0","method":"initialize","id":1,"params":{"protocolVersion":"2024-11-05","clientInfo":{"name":"...","version":"..."}}}; agent responded with capabilities, authMethods, _meta (modelState, mcpServers, availableCommands).

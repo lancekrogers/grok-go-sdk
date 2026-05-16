@@ -1,0 +1,4 @@
+captured: 2026-05-16
+binary: grok 0.1.211
+command: grok sessions list -n 5
+note: header row plus space-separated columns; format is "SESSION ID  CREATED  UPDATED  STATUS  SUMMARY". Output also includes a "(no label)" preamble line.

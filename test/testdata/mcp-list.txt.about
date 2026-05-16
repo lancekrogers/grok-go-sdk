@@ -1,0 +1,4 @@
+captured: 2026-05-16
+binary: grok 0.1.211
+command: grok mcp list
+note: with no MCP servers configured, the output is a single message line. parser must tolerate non-table outputs.
