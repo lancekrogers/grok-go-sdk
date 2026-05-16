@@ -86,13 +86,13 @@ type RunOptions struct {
 	NoSubagents         bool
 	AgentProfile        string
 
-	AllowRules       []string
-	DenyRules        []string
-	AllowedTools     []string
-	DisallowedTools  []string
-	DisableWebSearch bool
-	PermissionMode   PermissionMode
-	AlwaysApprove    bool
+	AllowRules         []string
+	DenyRules          []string
+	AllowedTools       []string
+	DisallowedTools    []string
+	DisableWebSearch   bool
+	PermissionMode     PermissionMode
+	AlwaysApprove      bool
 	AllowDangerousMode bool
 
 	SandboxProfile string
