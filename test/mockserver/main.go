@@ -9,8 +9,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 func main() {
@@ -175,7 +177,9 @@ func doAgent(args []string) int {
 	switch args[0] {
 	case "stdio":
 		return doAgentStdio()
-	case "headless", "serve", "leader":
+	case "serve":
+		return doAgentServe(args[1:])
+	case "headless", "leader":
 		return 0
 	}
 	return 0
@@ -199,6 +203,18 @@ func doAgentStdio() int {
 			os.Stdout.Write(append(b, '\n'))
 		}
 	}
+	return 0
+}
+
+func doAgentServe(args []string) int {
+	bind := flagValue(args, "--bind")
+	if bind == "" {
+		bind = "127.0.0.1:0"
+	}
+	fmt.Fprintf(os.Stderr, "listening on %s\n", bind)
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
+	<-sig
 	return 0
 }
 
