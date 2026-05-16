@@ -67,11 +67,8 @@ func (c *GrokClient) MCPRemove(ctx context.Context, name string) error {
 }
 
 func (c *GrokClient) MCPDoctor(ctx context.Context) (string, error) {
-	out, err := c.runSubcommand(ctx, []string{"mcp", "doctor"})
-	if err != nil {
-		return "", err
-	}
-	return string(out), nil
+	out, err := c.runSubcommandTolerant(ctx, []string{"mcp", "doctor"})
+	return string(out), err
 }
 
 func parseMCPList(b []byte) []MCPServerConfig {

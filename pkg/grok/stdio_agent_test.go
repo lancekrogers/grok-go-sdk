@@ -9,122 +9,136 @@ import (
 	"go.uber.org/goleak"
 )
 
-func TestStdioAgent_RequestResponse(t *testing.T) {
+func TestStdioSession_FullHandshakeAndPrompt(t *testing.T) {
 	defer goleak.VerifyNone(t)
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	sess, err := c.StartStdioAgent(ctx, nil)
+
+	s, err := c.StartStdioAgent(ctx, nil)
 	if err != nil {
 		t.Fatalf("start: %v", err)
 	}
-	resp, err := sess.RequestResponse(ctx, AgentMessage{Type: "user", ID: "1", Text: "hi"})
+
+	init, err := s.Initialize(ctx, "test", "0.0.0")
 	if err != nil {
-		t.Fatalf("rr: %v", err)
+		t.Fatalf("initialize: %v", err)
 	}
-	if resp.ID != "1" {
-		t.Fatalf("got id %q want %q", resp.ID, "1")
+	if init.ProtocolVersion == 0 {
+		t.Fatalf("initialize missing protocolVersion: %#v", init)
 	}
-	if err := sess.Close(); err != nil {
+	if len(init.AuthMethods) == 0 {
+		t.Fatalf("initialize missing authMethods: %#v", init)
+	}
+
+	if _, err := s.Authenticate(ctx, "cached_token"); err != nil {
+		t.Fatalf("authenticate: %v", err)
+	}
+
+	sessID, err := s.NewSession(ctx, "/tmp", nil)
+	if err != nil {
+		t.Fatalf("new session: %v", err)
+	}
+	if sessID == "" {
+		t.Fatal("empty session id")
+	}
+
+	var collected []string
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for u := range s.Updates() {
+			if u.Update.SessionUpdate == UpdateAgentMessageChunk {
+				collected = append(collected, u.Update.ContentText())
+			}
+		}
+	}()
+
+	res, err := s.PromptText(ctx, sessID, "hello world")
+	if err != nil {
+		t.Fatalf("prompt: %v", err)
+	}
+	if res.StopReason == "" {
+		t.Fatalf("missing stopReason: %#v", res)
+	}
+	if res.Meta == nil || res.Meta.TotalTokens == 0 {
+		t.Fatalf("missing usage meta: %#v", res)
+	}
+
+	if err := s.Close(); err != nil {
 		t.Fatalf("close: %v", err)
+	}
+	<-done
+	if len(collected) == 0 {
+		t.Fatal("no agent_message_chunk content received")
 	}
 }
 
-func TestStdioAgent_ReceivePanicsOnSecondCall(t *testing.T) {
+func TestStdioSession_MethodNotFound(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	sess, err := c.StartStdioAgent(ctx, nil)
-	if err != nil {
-		t.Fatalf("start: %v", err)
-	}
-	defer sess.Close()
-	_, _ = sess.Receive()
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatal("expected panic on second Receive")
-		}
-	}()
-	_, _ = sess.Receive()
-}
-
-func TestRequestResponse_RoundTrip(t *testing.T) {
-	mock := buildOrLocateMock(t)
-	c := NewClient(mock)
-	s, err := c.StartStdioAgent(context.Background(), &StdioConfig{})
+	s, err := c.StartStdioAgent(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer s.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	resp, err := s.RequestResponse(ctx, AgentMessage{Type: "echo", Text: "ping"})
-	if err != nil {
-		t.Fatal(err)
+	var ignored map[string]any
+	err = s.Call(ctx, "nonexistent/method", map[string]string{}, &ignored)
+	if err == nil {
+		t.Fatal("expected error for unknown method")
 	}
-	if resp.Text != "ping" {
-		t.Fatalf("got %q want %q", resp.Text, "ping")
+	rerr, ok := err.(*RPCError)
+	if !ok {
+		t.Fatalf("expected *RPCError, got %T: %v", err, err)
+	}
+	if rerr.Code != -32601 {
+		t.Fatalf("expected code -32601, got %d", rerr.Code)
 	}
 }
 
-func TestRequestResponse_ContextCancel(t *testing.T) {
+func TestStdioSession_ContextCancel(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
-	s, err := c.StartStdioAgent(context.Background(), &StdioConfig{})
+	s, err := c.StartStdioAgent(context.Background(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer s.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	_, err = s.RequestResponse(ctx, AgentMessage{Type: "echo", ID: "no-such-id-will-never-match", Text: "ping"})
-	if err == nil {
-		t.Fatal("expected error")
+	if _, err := s.Initialize(ctx, "test", "0"); err == nil {
+		t.Fatal("expected ctx.Err()")
 	}
 }
 
-func TestRequestResponse_ConcurrentInFlight(t *testing.T) {
+func TestStdioSession_ConcurrentCalls(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
-	s, err := c.StartStdioAgent(context.Background(), &StdioConfig{})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	s, err := c.StartStdioAgent(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer s.Close()
+	if _, err := s.Initialize(ctx, "test", "0"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Authenticate(ctx, "cached_token"); err != nil {
+		t.Fatal(err)
+	}
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			if _, err := s.RequestResponse(ctx, AgentMessage{Type: "echo", Text: "ping"}); err != nil {
-				t.Errorf("rr: %v", err)
+			if _, err := s.NewSession(ctx, "/tmp", nil); err != nil {
+				t.Errorf("new session: %v", err)
 			}
 		}()
-	}
-	wg.Wait()
-}
-
-func TestStdioAgent_ConcurrentSend(t *testing.T) {
-	mock := buildOrLocateMock(t)
-	c := NewClient(mock)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	sess, err := c.StartStdioAgent(ctx, nil)
-	if err != nil {
-		t.Fatalf("start: %v", err)
-	}
-	defer sess.Close()
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			_ = sess.Send(AgentMessage{Type: "user", Text: "ping"})
-		}(i)
 	}
 	wg.Wait()
 }

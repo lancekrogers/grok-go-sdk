@@ -96,6 +96,25 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 	return result, nil
 }
 
+func (c *GrokClient) runSubcommandTolerant(ctx context.Context, args []string) ([]byte, error) {
+	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd.Dir = c.WorkingDir
+	cmd.Env = c.envBase(nil)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err == nil {
+		return stdout.Bytes(), nil
+	}
+	if ee, ok := err.(*exec.ExitError); ok {
+		ge := ParseError(stderr.String(), ee.ExitCode())
+		ge.Original = err
+		return stdout.Bytes(), ge
+	}
+	return stdout.Bytes(), err
+}
+
 func (c *GrokClient) runSubcommand(ctx context.Context, args []string) ([]byte, error) {
 	cmd := execCommand(ctx, c.BinPath, args...)
 	cmd.Dir = c.WorkingDir
