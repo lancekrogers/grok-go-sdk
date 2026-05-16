@@ -37,3 +37,31 @@ func isProduction() bool {
 	}
 	return false
 }
+
+func (c *Client) BypassAllPermissions(prompt string, opts *grok.RunOptions) (*grok.GrokResult, error) {
+	o := cloneOpts(opts)
+	o.AlwaysApprove = true
+	o.AllowDangerousMode = true
+	return c.inner.RunPrompt(prompt, o)
+}
+
+func (c *Client) WithBypassPermissionsMode(prompt string, opts *grok.RunOptions) (*grok.GrokResult, error) {
+	o := cloneOpts(opts)
+	o.PermissionMode = grok.PermissionBypassPermissions
+	o.AllowDangerousMode = true
+	return c.inner.RunPrompt(prompt, o)
+}
+
+func (c *Client) DisableSandbox(prompt string, opts *grok.RunOptions) (*grok.GrokResult, error) {
+	o := cloneOpts(opts)
+	o.SandboxProfile = "off"
+	return c.inner.RunPrompt(prompt, o)
+}
+
+func cloneOpts(opts *grok.RunOptions) *grok.RunOptions {
+	if opts == nil {
+		return &grok.RunOptions{}
+	}
+	cp := *opts
+	return &cp
+}
