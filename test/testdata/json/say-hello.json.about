@@ -1,0 +1,6 @@
+captured: 2026-05-16
+binary: grok 0.1.210 (8b63e9068c)
+model: grok-build
+prompt: "say hello"
+fields: text, stopReason, sessionId, requestId, thought
+note: no cost/duration/token fields observed in this capture

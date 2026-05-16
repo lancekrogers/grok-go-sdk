@@ -1,1 +1,7 @@
-{"text":"Hello! How can I help you today?","stopReason":"EndTurn","sessionId":"mock-session-01HMOCK0000000000000000000","requestId":"mock-request-01HMOCK0000000000000000000"}
+{
+  "text": "Hello! How can I help you today?",
+  "stopReason": "EndTurn",
+  "sessionId": "019e3255-4a03-7dd3-94a0-09143882d053",
+  "requestId": "6a85decc-5a9d-4256-8467-ed32732a46af",
+  "thought": "The user just said \"say hello\". This is a simple greeting request. I should respond in a friendly, direct manner.\n"
+}
