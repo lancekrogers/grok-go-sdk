@@ -1,3 +1,75 @@
 package grok
 
-// TODO: implement sessions.go
+import (
+	"bufio"
+	"bytes"
+	"context"
+	"strconv"
+	"strings"
+)
+
+type SessionSummary struct {
+	ID          string
+	Summary     string
+	UpdatedAt   string
+	CWD         string
+	FirstPrompt string
+}
+
+func (c *GrokClient) SessionsList(ctx context.Context, limit int) ([]SessionSummary, error) {
+	args := []string{"sessions", "list"}
+	if limit > 0 {
+		args = append(args, "-n", strconv.Itoa(limit))
+	}
+	out, err := c.runSubcommand(ctx, args)
+	if err != nil {
+		return nil, err
+	}
+	return parseSessions(out), nil
+}
+
+func (c *GrokClient) SessionsSearch(ctx context.Context, query string, limit int) ([]SessionSummary, error) {
+	args := []string{"sessions", "search", query}
+	if limit > 0 {
+		args = append(args, "-n", strconv.Itoa(limit))
+	}
+	out, err := c.runSubcommand(ctx, args)
+	if err != nil {
+		return nil, err
+	}
+	return parseSessions(out), nil
+}
+
+func parseSessions(data []byte) []SessionSummary {
+	var out []SessionSummary
+	sc := bufio.NewScanner(bytes.NewReader(data))
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		s := parseSessionLine(line)
+		if s.ID != "" {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+func parseSessionLine(line string) SessionSummary {
+	parts := strings.Split(line, "\t")
+	s := SessionSummary{}
+	if len(parts) > 0 {
+		s.ID = parts[0]
+	}
+	if len(parts) > 1 {
+		s.UpdatedAt = parts[1]
+	}
+	if len(parts) > 2 {
+		s.CWD = parts[2]
+	}
+	if len(parts) > 3 {
+		s.Summary = parts[3]
+	}
+	return s
+}
