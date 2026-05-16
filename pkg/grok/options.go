@@ -3,7 +3,6 @@ package grok
 import (
 	"fmt"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -144,21 +143,11 @@ func PreprocessOptions(opts *RunOptions) error {
 		return fmt.Errorf("validation: ForkSession not yet supported by grok CLI")
 	}
 
-	for i, r := range opts.AllowRules {
-		if r == "" {
-			return fmt.Errorf("validation: AllowRules[%d] is empty", i)
-		}
-		if strings.ContainsRune(r, 0) {
-			return fmt.Errorf("validation: AllowRules[%d] contains null byte", i)
-		}
+	if err := validateRules(opts.AllowRules, "AllowRules"); err != nil {
+		return err
 	}
-	for i, r := range opts.DenyRules {
-		if r == "" {
-			return fmt.Errorf("validation: DenyRules[%d] is empty", i)
-		}
-		if strings.ContainsRune(r, 0) {
-			return fmt.Errorf("validation: DenyRules[%d] contains null byte", i)
-		}
+	if err := validateRules(opts.DenyRules, "DenyRules"); err != nil {
+		return err
 	}
 
 	if !opts.AllowDangerousMode {
