@@ -222,4 +222,3 @@ func cloneRunOptions(opts *RunOptions) *RunOptions {
 	return &cp
 }
 
-type RetryPolicy struct{}
