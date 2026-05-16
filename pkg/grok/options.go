@@ -222,6 +222,4 @@ func cloneRunOptions(opts *RunOptions) *RunOptions {
 	return &cp
 }
 
-type BudgetTracker struct{}
-
 type RetryPolicy struct{}

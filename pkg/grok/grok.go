@@ -50,6 +50,14 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 		defer cancel()
 	}
 	args := BuildArgs(prompt, prepared)
+	if prepared.BudgetTracker != nil {
+		if err := prepared.BudgetTracker.Check(); err != nil {
+			return nil, err
+		}
+		if prepared.MaxBudgetUSD > 0 && prepared.BudgetTracker.TotalSpent() > prepared.MaxBudgetUSD {
+			return nil, &GrokError{Type: ErrorValidation, Message: "per-call budget exceeded"}
+		}
+	}
 	if prepared.PluginManager != nil {
 		if err := prepared.PluginManager.fireBefore(ctx, BeforeRunEvent{Prompt: prompt, Opts: prepared, Args: args}); err != nil {
 			return nil, err
@@ -76,6 +84,9 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 	result, err := decodeOutput(prepared.Format, stdout.Bytes())
 	if err != nil {
 		return nil, err
+	}
+	if prepared.BudgetTracker != nil && result != nil {
+		prepared.BudgetTracker.Add(result.CostUSD)
 	}
 	if prepared.PluginManager != nil {
 		if err := prepared.PluginManager.fireAfter(ctx, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Result: result}); err != nil {
