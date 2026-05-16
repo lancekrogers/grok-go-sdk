@@ -50,6 +50,11 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 		defer cancel()
 	}
 	args := BuildArgs(prompt, prepared)
+	if prepared.PluginManager != nil {
+		if err := prepared.PluginManager.fireBefore(ctx, BeforeRunEvent{Prompt: prompt, Opts: prepared, Args: args}); err != nil {
+			return nil, err
+		}
+	}
 	cmd := execCommand(ctx, c.BinPath, args...)
 	cmd.Dir = c.workDir(prepared)
 	cmd.Env = c.envFor(prepared)
@@ -63,9 +68,21 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 		}
 		ge := ParseError(stderr.String(), exitCode)
 		ge.Original = err
+		if prepared.PluginManager != nil {
+			_ = prepared.PluginManager.fireAfter(ctx, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Err: ge})
+		}
 		return nil, ge
 	}
-	return decodeOutput(prepared.Format, stdout.Bytes())
+	result, err := decodeOutput(prepared.Format, stdout.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	if prepared.PluginManager != nil {
+		if err := prepared.PluginManager.fireAfter(ctx, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Result: result}); err != nil {
+			return result, err
+		}
+	}
+	return result, nil
 }
 
 func (c *GrokClient) runSubcommand(ctx context.Context, args []string) ([]byte, error) {
