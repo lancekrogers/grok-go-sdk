@@ -2,6 +2,7 @@ package grok
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -90,6 +91,8 @@ func (c *GrokClient) StreamPrompt(ctx context.Context, prompt string, opts *RunO
 	cmd := execCommand(ctx, c.BinPath, args...)
 	cmd.Dir = c.workDir(prepared)
 	cmd.Env = c.envFor(prepared)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -106,11 +109,11 @@ func (c *GrokClient) StreamPrompt(ctx context.Context, prompt string, opts *RunO
 		return events, errs
 	}
 
-	go pumpStream(ctx, cmd, stdout, events, errs)
+	go pumpStream(ctx, cmd, stdout, &stderr, events, errs)
 	return events, errs
 }
 
-func pumpStream(ctx context.Context, cmd *exec.Cmd, r io.ReadCloser, events chan<- Event, errs chan<- error) {
+func pumpStream(ctx context.Context, cmd *exec.Cmd, r io.ReadCloser, stderr *bytes.Buffer, events chan<- Event, errs chan<- error) {
 	var once sync.Once
 	closeAll := func() {
 		once.Do(func() {
@@ -156,7 +159,7 @@ func pumpStream(ctx context.Context, cmd *exec.Cmd, r io.ReadCloser, events chan
 
 	select {
 	case <-done:
-		_ = cmd.Wait()
+		reportStreamWaitError(ctx, cmd.Wait(), stderr, errs)
 	case <-ctx.Done():
 		if cmd.Process != nil {
 			_ = cmd.Process.Signal(syscall.SIGTERM)
@@ -170,6 +173,25 @@ func pumpStream(ctx context.Context, cmd *exec.Cmd, r io.ReadCloser, events chan
 				_ = cmd.Process.Kill()
 			}
 		}
-		_ = cmd.Wait()
+		waitErr := cmd.Wait()
+		if ctx.Err() == nil {
+			reportStreamWaitError(ctx, waitErr, stderr, errs)
+		}
+	}
+}
+
+func reportStreamWaitError(ctx context.Context, err error, stderr *bytes.Buffer, errs chan<- error) {
+	if err == nil {
+		return
+	}
+	exitCode := 1
+	if ee, ok := err.(*exec.ExitError); ok {
+		exitCode = ee.ExitCode()
+	}
+	ge := ParseError(stderr.String(), exitCode)
+	ge.Original = err
+	select {
+	case errs <- ge:
+	case <-ctx.Done():
 	}
 }

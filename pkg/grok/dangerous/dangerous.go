@@ -55,6 +55,7 @@ func (c *Client) WithBypassPermissionsMode(prompt string, opts *grok.RunOptions)
 func (c *Client) DisableSandbox(prompt string, opts *grok.RunOptions) (*grok.GrokResult, error) {
 	o := cloneOpts(opts)
 	o.SandboxProfile = "off"
+	o.AllowDangerousMode = true
 	return c.inner.RunPrompt(prompt, o)
 }
 
