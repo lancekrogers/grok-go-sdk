@@ -21,6 +21,11 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 OUTPUT_DIR="${PROJECT_DIR}/docs/gif"
 EXPECT_DIR="${SCRIPT_DIR}/demo-expect"
 
+# Force the local Go toolchain. Without this, go.mod's `go <version>`
+# directive can trigger an automatic toolchain download via
+# GOTOOLCHAIN=auto, which hangs the recording per demo on slow networks.
+export GOTOOLCHAIN="${GOTOOLCHAIN:-local}"
+
 RED=$'\033[0;31m'
 GREEN=$'\033[0;32m'
 BLUE=$'\033[0;34m'
@@ -54,7 +59,7 @@ EOF
 
 check_deps() {
     local missing=()
-    for bin in asciinema agg just; do
+    for bin in asciinema agg just go; do
         command -v "$bin" >/dev/null 2>&1 || missing+=("$bin")
     done
     if [ ${#missing[@]} -gt 0 ]; then
@@ -62,7 +67,7 @@ check_deps() {
         cat <<EOF >&2
 
 Install with:
-  brew install asciinema just
+  brew install asciinema just go
   cargo install --git https://github.com/asciinema/agg
 EOF
         return 1
@@ -72,6 +77,16 @@ EOF
         echo "Install from https://github.com/xai-org/grok and authenticate with 'grok login'." >&2
         return 1
     fi
+}
+
+prebuild_examples() {
+    echo "${BLUE}Pre-building examples (GOTOOLCHAIN=${GOTOOLCHAIN})...${NC}"
+    if ! (cd "$PROJECT_DIR" && go build -o "$PROJECT_DIR/bin/" ./examples/... ); then
+        echo "${RED}Pre-build failed.${NC}" >&2
+        echo "If you see a 'toolchain' or 'go version' error: bump your local Go install to match go.mod, or remove the GOTOOLCHAIN=local override." >&2
+        return 1
+    fi
+    echo "${GREEN}Pre-build complete.${NC}"
 }
 
 needs_expect() {
@@ -102,7 +117,7 @@ record_oneshot() {
     echo "${BLUE}Sandbox: ${sandbox}${NC}"
     trap 'rm -rf "$sandbox"' EXIT
 
-    local force_term="TERM=xterm-256color FORCE_COLOR=1 CLICOLOR_FORCE=1"
+    local force_term="TERM=xterm-256color FORCE_COLOR=1 CLICOLOR_FORCE=1 GOTOOLCHAIN=${GOTOOLCHAIN}"
     local typed_cmd="just demo ${demo}"
     local inner="cd $sandbox && echo '\$ $typed_cmd' && sleep 0.6 && cd '$PROJECT_DIR' && $typed_cmd"
 
@@ -154,7 +169,7 @@ record_with_expect() {
         --overwrite \
         --cols=100 \
         --rows=25 \
-        --command="PROJECT_DIR=$PROJECT_DIR TERM=$TERM FORCE_COLOR=$FORCE_COLOR expect $expect_script"
+        --command="PROJECT_DIR=$PROJECT_DIR TERM=$TERM FORCE_COLOR=$FORCE_COLOR GOTOOLCHAIN=${GOTOOLCHAIN} expect $expect_script"
 
     trap - EXIT
     rm -rf "$sandbox"
@@ -225,6 +240,7 @@ main() {
         exit 0
     fi
     check_deps
+    prebuild_examples
     if [ "$arg" = "all" ]; then
         record_all
     else
