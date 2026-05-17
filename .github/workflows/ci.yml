@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Check formatting
+        run: |
+          mapfile -t gofiles < <(git ls-files '*.go')
+          unformatted="$(gofmt -l "${gofiles[@]}")"
+          if [ -n "$unformatted" ]; then
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Unit tests
+        run: go test ./pkg/grok/...
+
+      - name: Race tests
+        run: go test -race ./pkg/grok/...
+
+      - name: Mock integration tests
+        run: |
+          go build -o test/mockserver/bin/grok-mock ./test/mockserver
+          GROK_MOCK_BIN="$PWD/test/mockserver/bin/grok-mock" \
+          INTEGRATION_TESTS=1 \
+          USE_MOCK_BINARY=1 \
+            go test -tags=integration ./test/integration -v
+
+      - name: Build examples
+        run: go build ./examples/...

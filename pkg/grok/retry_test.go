@@ -76,6 +76,20 @@ func TestRetry_ProcessError_RetriesUpToMax(t *testing.T) {
 	}
 }
 
+func TestRetryPolicy_ZeroMaxDelayDoesNotClamp(t *testing.T) {
+	p := &RetryPolicy{
+		BaseDelay:     100 * time.Millisecond,
+		BackoffFactor: 2,
+		Jitter:        false,
+	}
+	if got, want := p.backoffDelay(1), 100*time.Millisecond; got != want {
+		t.Fatalf("attempt 1 delay=%s want %s", got, want)
+	}
+	if got, want := p.backoffDelay(2), 200*time.Millisecond; got != want {
+		t.Fatalf("attempt 2 delay=%s want %s", got, want)
+	}
+}
+
 func TestRetry_RespectsContextCancel(t *testing.T) {
 	cleanup, _ := mockExitScript(t, "Error: process crashed", 1)
 	defer cleanup()

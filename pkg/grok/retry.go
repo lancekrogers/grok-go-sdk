@@ -30,7 +30,7 @@ func (p *RetryPolicy) backoffDelay(attempt int) time.Duration {
 	for i := 0; i < attempt-1; i++ {
 		d *= p.BackoffFactor
 	}
-	if time.Duration(d) > p.MaxDelay {
+	if p.MaxDelay > 0 && time.Duration(d) > p.MaxDelay {
 		d = float64(p.MaxDelay)
 	}
 	if p.Jitter {
