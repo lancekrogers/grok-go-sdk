@@ -6,6 +6,8 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
 </p>
 
+> Under development, not officially released yet.
+
 A Go library for programmatically integrating the [grok](https://github.com/xai-org/grok)
 CLI into Go applications. Wraps the headless and stdio-agent surfaces of the
 `grok` binary so Go programs can drive Grok Build sessions, stream output,
