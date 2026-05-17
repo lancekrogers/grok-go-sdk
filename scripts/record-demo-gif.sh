@@ -77,6 +77,10 @@ EOF
         echo "Install from https://github.com/xai-org/grok and authenticate with 'grok login'." >&2
         return 1
     fi
+    if ! asciinema rec --help 2>&1 | grep -q 'asciicast-v2'; then
+        echo "${YELLOW}Warning: this asciinema build does not advertise asciicast-v2 output.${NC}" >&2
+        echo "  agg requires v2 cast files; if conversion fails, downgrade asciinema or upgrade agg." >&2
+    fi
 }
 
 prebuild_examples() {
@@ -123,6 +127,7 @@ record_oneshot() {
 
     asciinema rec "$cast_file" \
         --overwrite \
+        --output-format=asciicast-v2 \
         --cols=100 \
         --rows=25 \
         --command="env $force_term bash -lc \"$inner\""
@@ -167,6 +172,7 @@ record_with_expect() {
 
     asciinema rec "$cast_file" \
         --overwrite \
+        --output-format=asciicast-v2 \
         --cols=100 \
         --rows=25 \
         --command="PROJECT_DIR=$PROJECT_DIR TERM=$TERM FORCE_COLOR=$FORCE_COLOR GOTOOLCHAIN=${GOTOOLCHAIN} expect $expect_script"
