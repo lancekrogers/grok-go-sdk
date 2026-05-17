@@ -41,7 +41,7 @@ integration:
 integration-real:
     @echo "Running real integration tests..."
     @echo "Requires grok CLI installed and authenticated"
-    INTEGRATION_TESTS=1 go test -tags=integration {{PROJECT_DIR}}/test/integration -v
+    INTEGRATION_REAL=1 INTEGRATION_TESTS=1 go test -tags=integration {{PROJECT_DIR}}/test/integration -v
     @echo "Real integration tests complete"
 
 # Run tests with race detection
