@@ -27,7 +27,7 @@ func (c *GrokClient) LeaderList(ctx context.Context) ([]LeaderInfo, error) {
 }
 
 func (c *GrokClient) LeaderInfoCmd(ctx context.Context, pid int) (*LeaderInfo, error) {
-	out, err := c.runSubcommand(ctx, []string{"leader", "info", strconv.Itoa(pid), "--json"})
+	out, err := c.runSubcommand(ctx, leaderInfoArgs(pid))
 	if err != nil {
 		return nil, err
 	}
@@ -44,21 +44,29 @@ func (c *GrokClient) LeaderKill(ctx context.Context) error {
 }
 
 func (c *GrokClient) LeaderProfileStart(ctx context.Context, pid int) error {
-	_, err := c.runSubcommand(ctx, []string{"leader", "profile", "start", strconv.Itoa(pid)})
+	_, err := c.runSubcommand(ctx, leaderProfileArgs("start", pid))
 	return err
 }
 
 func (c *GrokClient) LeaderProfileStop(ctx context.Context, pid int) error {
-	_, err := c.runSubcommand(ctx, []string{"leader", "profile", "stop", strconv.Itoa(pid)})
+	_, err := c.runSubcommand(ctx, leaderProfileArgs("stop", pid))
 	return err
 }
 
 func (c *GrokClient) LeaderProfileStatus(ctx context.Context, pid int) (string, error) {
-	out, err := c.runSubcommand(ctx, []string{"leader", "profile", "status", strconv.Itoa(pid)})
+	out, err := c.runSubcommand(ctx, leaderProfileArgs("status", pid))
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(string(out)), nil
+}
+
+func leaderInfoArgs(pid int) []string {
+	return []string{"leader", "info", "--pid", strconv.Itoa(pid), "--json"}
+}
+
+func leaderProfileArgs(action string, pid int) []string {
+	return []string{"leader", "profile", action, "--pid", strconv.Itoa(pid)}
 }
 
 func parseLeaderListText(b []byte) []LeaderInfo {

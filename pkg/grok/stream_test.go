@@ -2,6 +2,7 @@ package grok
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -98,6 +99,45 @@ func TestStreamPrompt_AgainstMock(t *testing.T) {
 	}
 	if len(got) == 0 {
 		t.Fatal("no events received")
+	}
+}
+
+func TestStreamPrompt_ProcessErrorReported(t *testing.T) {
+	mock := buildOrLocateMock(t)
+	t.Setenv("GROK_MOCK_EXIT_CODE", "2")
+	t.Setenv("GROK_MOCK_STDERR", "invalid stream request")
+	c := NewClient(mock)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	events, errs := c.StreamPrompt(ctx, "hello", &RunOptions{})
+	var gotErr error
+	for events != nil || errs != nil {
+		select {
+		case _, ok := <-events:
+			if !ok {
+				events = nil
+			}
+		case err, ok := <-errs:
+			if !ok {
+				errs = nil
+				continue
+			}
+			if err != nil {
+				gotErr = err
+			}
+		case <-ctx.Done():
+			t.Fatalf("timeout waiting for stream close: %v", ctx.Err())
+		}
+	}
+	if gotErr == nil {
+		t.Fatal("expected stream process error")
+	}
+	var ge *GrokError
+	if !errors.As(gotErr, &ge) {
+		t.Fatalf("expected *GrokError, got %T: %v", gotErr, gotErr)
+	}
+	if ge.Type != ErrorValidation {
+		t.Fatalf("got error type %q want %q", ge.Type, ErrorValidation)
 	}
 }
 

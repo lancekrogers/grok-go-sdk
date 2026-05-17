@@ -150,6 +150,13 @@ func PreprocessOptions(opts *RunOptions) error {
 		return err
 	}
 
+	if opts.Format == "" {
+		opts.Format = PlainOutput
+	}
+	if opts.SandboxProfile == "" {
+		opts.SandboxProfile = os.Getenv("GROK_SANDBOX")
+	}
+
 	if !opts.AllowDangerousMode {
 		if opts.AlwaysApprove {
 			return fmt.Errorf("validation: AlwaysApprove requires AllowDangerousMode=true")
@@ -157,13 +164,9 @@ func PreprocessOptions(opts *RunOptions) error {
 		if opts.PermissionMode == PermissionBypassPermissions {
 			return fmt.Errorf("validation: PermissionBypassPermissions requires AllowDangerousMode=true")
 		}
-	}
-
-	if opts.Format == "" {
-		opts.Format = PlainOutput
-	}
-	if opts.SandboxProfile == "" {
-		opts.SandboxProfile = os.Getenv("GROK_SANDBOX")
+		if SandboxIsPermissive(opts.SandboxProfile) {
+			return fmt.Errorf("validation: permissive SandboxProfile requires AllowDangerousMode=true")
+		}
 	}
 
 	return nil

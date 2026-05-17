@@ -2,6 +2,7 @@ package grok
 
 import (
 	"context"
+	"reflect"
 	"testing"
 )
 
@@ -37,5 +38,14 @@ func TestLeaderProfile_AgainstMock(t *testing.T) {
 	}
 	if _, err := c.LeaderProfileStatus(context.Background(), 1234); err != nil {
 		t.Fatalf("status: %v", err)
+	}
+}
+
+func TestLeaderArgsUsePIDFlag(t *testing.T) {
+	if got, want := leaderInfoArgs(1234), []string{"leader", "info", "--pid", "1234", "--json"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("leader info args got %v want %v", got, want)
+	}
+	if got, want := leaderProfileArgs("start", 1234), []string{"leader", "profile", "start", "--pid", "1234"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("leader profile args got %v want %v", got, want)
 	}
 }

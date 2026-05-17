@@ -90,6 +90,32 @@ func TestPreprocessOptions_BypassRequiresDangerous(t *testing.T) {
 	}
 }
 
+func TestPreprocessOptions_PermissiveSandboxRequiresDangerous(t *testing.T) {
+	err := PreprocessOptions(&RunOptions{Prompt: "x", SandboxProfile: "off"})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "AllowDangerousMode") {
+		t.Errorf("got %v", err)
+	}
+
+	err = PreprocessOptions(&RunOptions{Prompt: "x", SandboxProfile: "off", AllowDangerousMode: true})
+	if err != nil {
+		t.Fatalf("AllowDangerousMode should permit permissive sandbox: %v", err)
+	}
+}
+
+func TestPreprocessOptions_EnvPermissiveSandboxRequiresDangerous(t *testing.T) {
+	t.Setenv("GROK_SANDBOX", "off")
+	err := PreprocessOptions(&RunOptions{Prompt: "x"})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "AllowDangerousMode") {
+		t.Errorf("got %v", err)
+	}
+}
+
 func TestPreprocessOptions_ForkRejected(t *testing.T) {
 	err := PreprocessOptions(&RunOptions{Prompt: "x", ForkSession: true})
 	if err == nil {
