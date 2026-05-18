@@ -142,3 +142,44 @@ func TestStdioSession_ConcurrentCalls(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+func TestStdioSession_CloseAfterPromptDoesNotRaceReadLoop(t *testing.T) {
+	mock := buildOrLocateMock(t)
+	for i := 0; i < 25; i++ {
+		c := NewClient(mock)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		s, err := c.StartStdioAgent(ctx, nil)
+		if err != nil {
+			cancel()
+			t.Fatalf("start %d: %v", i, err)
+		}
+		if _, err := s.Initialize(ctx, "test", "0"); err != nil {
+			cancel()
+			t.Fatalf("initialize %d: %v", i, err)
+		}
+		if _, err := s.Authenticate(ctx, "cached_token"); err != nil {
+			cancel()
+			t.Fatalf("authenticate %d: %v", i, err)
+		}
+		sessID, err := s.NewSession(ctx, "/tmp", nil)
+		if err != nil {
+			cancel()
+			t.Fatalf("new session %d: %v", i, err)
+		}
+		if _, err := s.PromptText(ctx, sessID, "hello world"); err != nil {
+			cancel()
+			t.Fatalf("prompt %d: %v", i, err)
+		}
+		if err := s.Close(); err != nil {
+			cancel()
+			t.Fatalf("close %d: %v", i, err)
+		}
+		select {
+		case <-s.Done():
+		default:
+			cancel()
+			t.Fatalf("session %d was not marked closed", i)
+		}
+		cancel()
+	}
+}
