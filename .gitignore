@@ -34,3 +34,7 @@ test/mockserver/bin/
 
 # Trace exports
 trace-exports/
+
+# asciinema intermediates from scripts/record-demo-gif.sh
+# (final docs/gif/*.gif outputs are committed)
+docs/gif/*.cast
