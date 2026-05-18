@@ -2,7 +2,7 @@
 
 Run date: 2026-05-16
 Grok CLI version: `grok 0.1.211`
-SDK commit: tip of `parity/real-grok`
+SDK commit: pre-v0.1.0 release candidate
 Consumer: `test/integration/` plus all 10 example programs under `examples/`. Examples are the verification surface, following the model used by `claude-code-go`.
 
 ## Test Results

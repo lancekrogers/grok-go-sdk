@@ -8,7 +8,7 @@ produce useful output against a real `grok` install, the SDK is broken.
 
 - `grok` installed on PATH and authenticated via `grok login`.
 - `just` to run the recipes.
-- `go` 1.26.1+ to build the examples.
+- Go 1.24 or newer to build the examples.
 
 ## Available demos
 

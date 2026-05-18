@@ -1,6 +1,6 @@
 # Release v0.1.0
 
-Initial private release.
+Initial public release.
 
 ## Scope
 

@@ -1,3 +1,0 @@
-captured: 2026-05-16
-binary: grok 0.1.211
-note: real `grok inspect --json` output. Top-level keys include grokVersion, cwd, projectRoot, projectTrusted (and more — see file).

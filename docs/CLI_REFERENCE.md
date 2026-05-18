@@ -1,10 +1,10 @@
 This document is the **complete** captured `grok --help` surface. The SDK
-public API in [04-api-surface.md](04-api-surface.md) must cover everything
-listed here that is callable in non-interactive mode. When the CLI ships new
-flags, refresh this file first, then update the Go option structs.
+public API under `pkg/grok` must cover everything listed here that is callable
+in non-interactive mode. When the CLI ships new flags, refresh this file first,
+then update the Go option structs.
 
-The reference binary lived at `/Users/lancerogers/.grok/bin/grok` on the
-capture date. The default model reported by `grok models` was `grok-build`.
+The reference binary lived at the standard `~/.grok/bin/grok` install path on
+the capture date. The default model reported by `grok models` was `grok-build`.
 
 ---
 
@@ -322,8 +322,8 @@ Fields the SDK must decode:
 
 Open question: cost, token, duration fields are not in the captured sample.
 The SDK structs include optional fields for these and `omitempty` round-trips
-gracefully. Confirm against `--include-...` style flags before launch (see
-[10-open-questions.md](10-open-questions.md)).
+gracefully. Confirm against future `--include-...` style flags before adding
+new required behavior.
 
 ### 3.3 `streaming-json`
 
@@ -362,5 +362,5 @@ When `grok` ships a new minor version:
    the first three events as a fixture in the implementation repo's
    `testdata/`.
 3. Update this file. Bump the captured version header.
-4. Update [04-api-surface.md](04-api-surface.md) only after this file is
-   accurate.
+4. Update `pkg/grok/options.go`, wrappers, tests, and README examples only
+   after this file is accurate.
