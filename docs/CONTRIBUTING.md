@@ -24,7 +24,7 @@ just build all
 ```
 just test all                            # unit tests
 just test integration                    # integration tests against mock binary
-INTEGRATION_REAL=1 just test integration # against real grok
+just test integration-real               # against real grok
 just coverage report                     # HTML coverage
 ```
 
@@ -45,7 +45,8 @@ See `test/testdata/<scenario>.about` files for capture metadata.
 
 - One logical change per PR.
 - Commits follow `<type>: <subject>` (chore, feat, fix, test, docs, refactor).
-- Tests must pass on the mock lane; the real lane runs in CI.
+- Tests must pass on the mock lane; run the real lane locally before changing
+  real grok integration behavior.
 - No emdashes in markdown.
 - No comments in Go code unless the WHY is non-obvious.
 

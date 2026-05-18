@@ -46,17 +46,17 @@ type InitializeParams struct {
 }
 
 type InitializeResult struct {
-	ProtocolVersion   int                  `json:"protocolVersion"`
-	AgentCapabilities AgentCapabilities    `json:"agentCapabilities"`
-	AuthMethods       []AuthMethod         `json:"authMethods"`
-	Meta              *InitializeMeta      `json:"_meta,omitempty"`
+	ProtocolVersion   int               `json:"protocolVersion"`
+	AgentCapabilities AgentCapabilities `json:"agentCapabilities"`
+	AuthMethods       []AuthMethod      `json:"authMethods"`
+	Meta              *InitializeMeta   `json:"_meta,omitempty"`
 }
 
 type AgentCapabilities struct {
-	LoadSession        bool                  `json:"loadSession"`
-	PromptCapabilities PromptCapabilities    `json:"promptCapabilities"`
-	MCPCapabilities    MCPCapabilities       `json:"mcpCapabilities"`
-	Meta               json.RawMessage       `json:"_meta,omitempty"`
+	LoadSession        bool               `json:"loadSession"`
+	PromptCapabilities PromptCapabilities `json:"promptCapabilities"`
+	MCPCapabilities    MCPCapabilities    `json:"mcpCapabilities"`
+	Meta               json.RawMessage    `json:"_meta,omitempty"`
 }
 
 type PromptCapabilities struct {
@@ -77,16 +77,16 @@ type AuthMethod struct {
 }
 
 type InitializeMeta struct {
-	GrokShell               bool             `json:"grokShell"`
-	CurrentWorkingDirectory string           `json:"currentWorkingDirectory"`
-	AgentVersion            string           `json:"agentVersion"`
-	AgentID                 string           `json:"agentId"`
-	AgentInstanceID         string           `json:"agentInstanceId"`
-	Hostname                string           `json:"hostname"`
-	ModelState              *ModelState      `json:"modelState,omitempty"`
-	MCPServers              []MCPServerInfo  `json:"mcpServers,omitempty"`
-	AvailableCommands       []AgentCommand   `json:"availableCommands,omitempty"`
-	CancelRewind            bool             `json:"cancelRewind"`
+	GrokShell               bool            `json:"grokShell"`
+	CurrentWorkingDirectory string          `json:"currentWorkingDirectory"`
+	AgentVersion            string          `json:"agentVersion"`
+	AgentID                 string          `json:"agentId"`
+	AgentInstanceID         string          `json:"agentInstanceId"`
+	Hostname                string          `json:"hostname"`
+	ModelState              *ModelState     `json:"modelState,omitempty"`
+	MCPServers              []MCPServerInfo `json:"mcpServers,omitempty"`
+	AvailableCommands       []AgentCommand  `json:"availableCommands,omitempty"`
+	CancelRewind            bool            `json:"cancelRewind"`
 }
 
 type ModelState struct {
@@ -160,31 +160,31 @@ type PromptParams struct {
 }
 
 type PromptResult struct {
-	StopReason string       `json:"stopReason"`
-	Meta       *PromptMeta  `json:"_meta,omitempty"`
+	StopReason string      `json:"stopReason"`
+	Meta       *PromptMeta `json:"_meta,omitempty"`
 }
 
 type PromptMeta struct {
-	SessionID         string `json:"sessionId"`
-	RequestID         string `json:"requestId"`
-	PromptID          string `json:"promptId"`
-	ModelID           string `json:"modelId"`
-	TotalTokens       int    `json:"totalTokens"`
-	InputTokens       int    `json:"inputTokens"`
-	OutputTokens      int    `json:"outputTokens"`
-	CachedReadTokens  int    `json:"cachedReadTokens"`
-	ReasoningTokens   int    `json:"reasoningTokens"`
+	SessionID        string `json:"sessionId"`
+	RequestID        string `json:"requestId"`
+	PromptID         string `json:"promptId"`
+	ModelID          string `json:"modelId"`
+	TotalTokens      int    `json:"totalTokens"`
+	InputTokens      int    `json:"inputTokens"`
+	OutputTokens     int    `json:"outputTokens"`
+	CachedReadTokens int    `json:"cachedReadTokens"`
+	ReasoningTokens  int    `json:"reasoningTokens"`
 }
 
 type SessionUpdateKind string
 
 const (
-	UpdateAgentMessageChunk      SessionUpdateKind = "agent_message_chunk"
-	UpdateAgentThoughtChunk      SessionUpdateKind = "agent_thought_chunk"
-	UpdateAvailableCommands      SessionUpdateKind = "available_commands_update"
-	UpdateToolCall               SessionUpdateKind = "tool_call"
-	UpdateToolCallUpdate         SessionUpdateKind = "tool_call_update"
-	UpdatePlan                   SessionUpdateKind = "plan"
+	UpdateAgentMessageChunk SessionUpdateKind = "agent_message_chunk"
+	UpdateAgentThoughtChunk SessionUpdateKind = "agent_thought_chunk"
+	UpdateAvailableCommands SessionUpdateKind = "available_commands_update"
+	UpdateToolCall          SessionUpdateKind = "tool_call"
+	UpdateToolCallUpdate    SessionUpdateKind = "tool_call_update"
+	UpdatePlan              SessionUpdateKind = "plan"
 )
 
 type SessionUpdate struct {

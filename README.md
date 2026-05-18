@@ -1,7 +1,7 @@
 <h1 align="center">Grok Go SDK</h1>
 
 <p align="center">
-  <a href="https://github.com/lancekrogers/grok-go-sdk/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lancekrogers/grok-go-sdk/ci.yml?label=CI"></a>
+  <a href="https://github.com/lancekrogers/grok-go-sdk/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lancekrogers/grok-go-sdk/ci.yml?branch=main&label=CI"></a>
   <a href="https://pkg.go.dev/github.com/lancekrogers/grok-go-sdk"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/lancekrogers/grok-go-sdk.svg"></a>
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
 </p>
@@ -225,9 +225,9 @@ export GROK_ENABLE_DANGEROUS="i-accept-all-risks"
 ## Testing
 
 ```
-just test           # all unit tests
-just test integration  # integration tests against the mock binary
-INTEGRATION_REAL=1 just test integration  # real-binary lane
+just test all                # all unit tests
+just test integration        # integration tests against the mock binary
+just test integration-real   # real-binary lane
 ```
 
 ## Development

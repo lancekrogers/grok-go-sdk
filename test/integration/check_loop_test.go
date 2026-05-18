@@ -46,4 +46,3 @@ func TestCheckLoop_RealRun(t *testing.T) {
 		t.Fatal("empty result")
 	}
 }
-
