@@ -121,7 +121,7 @@ record_oneshot() {
     echo "${BLUE}Sandbox: ${sandbox}${NC}"
     trap 'rm -rf "$sandbox"' EXIT
 
-    local force_term="TERM=xterm-256color FORCE_COLOR=1 CLICOLOR_FORCE=1 GOTOOLCHAIN=${GOTOOLCHAIN}"
+    local force_term="TERM=xterm-256color FORCE_COLOR=1 CLICOLOR_FORCE=1 GOTOOLCHAIN=${GOTOOLCHAIN} PATH=${PATH}"
     local typed_cmd="just demo ${demo}"
     local inner="cd $sandbox && echo '\$ $typed_cmd' && sleep 0.6 && cd '$PROJECT_DIR' && $typed_cmd"
 
@@ -130,7 +130,7 @@ record_oneshot() {
         --output-format=asciicast-v2 \
         --cols=100 \
         --rows=25 \
-        --command="env $force_term bash -lc \"$inner\""
+        --command="env $force_term bash -c \"$inner\""
 
     trap - EXIT
     rm -rf "$sandbox"
@@ -175,7 +175,7 @@ record_with_expect() {
         --output-format=asciicast-v2 \
         --cols=100 \
         --rows=25 \
-        --command="PROJECT_DIR=$PROJECT_DIR TERM=$TERM FORCE_COLOR=$FORCE_COLOR GOTOOLCHAIN=${GOTOOLCHAIN} expect $expect_script"
+        --command="env PROJECT_DIR=$PROJECT_DIR TERM=$TERM FORCE_COLOR=$FORCE_COLOR GOTOOLCHAIN=${GOTOOLCHAIN} PATH=${PATH} expect $expect_script"
 
     trap - EXIT
     rm -rf "$sandbox"
