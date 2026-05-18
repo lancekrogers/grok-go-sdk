@@ -23,9 +23,11 @@ func main() {
 		fmt.Printf("  - %s (%s)\n", s.Name, s.Transport)
 	}
 	report, err := c.MCPDoctor(ctx)
-	if err != nil {
-		log.Fatalf("mcp doctor: %v", err)
-	}
 	fmt.Println("\n--- mcp doctor ---")
-	fmt.Println(report)
+	if report != "" {
+		fmt.Println(report)
+	}
+	if err != nil {
+		fmt.Printf("(doctor reported: %v)\n", err)
+	}
 }
