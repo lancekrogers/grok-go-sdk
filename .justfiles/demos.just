@@ -66,6 +66,11 @@ agent-runtime: build-agent-runtime
     @echo "Starting agent_runtime demo..."
     {{BIN_DIR}}/agent_runtime
 
+# Build and run dangerous example (guarded)
+dangerous: _check-dangerous build-dangerous
+    @echo "Starting dangerous example..."
+    {{BIN_DIR}}/dangerous_example
+
 # ===== Build recipes =====
 
 build-basic:
@@ -98,9 +103,27 @@ build-subagents:
 build-agent-runtime:
     @just build agent-runtime
 
+build-dangerous:
+    @just build dangerous-example
+
 # Build all demos
 build-all: build-basic build-streaming build-sessions build-mcp build-agent-stdio build-worktree build-best-of-n build-check-loop build-subagents build-agent-runtime
     @echo "All demos built"
+
+# Check dangerous environment requirements
+[private]
+_check-dangerous:
+    #!/usr/bin/env bash
+    if [ "$GROK_ENABLE_DANGEROUS" != "i-accept-all-risks" ]; then
+        echo "Error: GROK_ENABLE_DANGEROUS must be set to 'i-accept-all-risks'"
+        echo "  export GROK_ENABLE_DANGEROUS=\"i-accept-all-risks\""
+        exit 1
+    fi
+    if [ "$NODE_ENV" = "production" ] || [ "$GO_ENV" = "production" ]; then
+        echo "Error: Cannot run dangerous example in production"
+        exit 1
+    fi
+    echo "Security requirements met"
 
 # ===== GIF generation (placeholders; script lands in scripts/) =====
 

@@ -77,7 +77,8 @@ grok-go-sdk/
 │   ├── best_of_n/
 │   ├── check_loop/
 │   ├── subagents/
-│   └── agent_runtime/            # embedded long-running agent host
+│   ├── agent_runtime/            # embedded long-running agent host
+│   └── dangerous/                # guarded dangerous-package demo
 ├── test/
 │   ├── integration/              # build tag: integration, real grok binary
 │   ├── mockserver/               # fake grok binary used by unit tests

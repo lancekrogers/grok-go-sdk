@@ -11,7 +11,7 @@ Initial public release.
 - Sessions: continue, resume, share, trace, import.
 - Admin subcommands: MCP, worktree, memory, update, setup, login, inspect, models, leader.
 - Ergonomics: plugin manager, budget tracker, retry policy, structured errors.
-- 10 examples including `agent_runtime` (embedded long-running agent host pattern).
+- Examples including `agent_runtime` (embedded long-running agent host pattern) and a guarded `dangerous` demo.
 - `dangerous` subpackage with `GROK_ENABLE_DANGEROUS` env guard.
 
 ## Transport Notes
