@@ -72,6 +72,9 @@ func (c *GrokClient) MCPDoctor(ctx context.Context) (string, error) {
 }
 
 func parseMCPList(b []byte) []MCPServerConfig {
+	if bytes.HasPrefix(bytes.TrimSpace(b), []byte("No MCP servers configured")) {
+		return nil
+	}
 	var out []MCPServerConfig
 	sc := bufio.NewScanner(bytes.NewReader(b))
 	var cur *MCPServerConfig

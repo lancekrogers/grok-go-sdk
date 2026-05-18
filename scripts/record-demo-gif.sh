@@ -36,6 +36,16 @@ ALL_DEMOS=(basic streaming sessions mcp agent-stdio worktree best-of-n check-loo
 DEFAULT_DEMOS=(basic streaming sessions mcp agent-stdio subagents)
 REPL_DEMOS=(agent-runtime)
 
+bin_name_for() {
+    case "$1" in
+        agent-stdio) echo agent_stdio ;;
+        best-of-n)   echo best_of_n ;;
+        check-loop)  echo check_loop ;;
+        agent-runtime) echo agent_runtime ;;
+        *) echo "$1" ;;
+    esac
+}
+
 usage() {
     cat <<EOF
 Usage: $0 <demo|all|list>
@@ -123,7 +133,9 @@ record_oneshot() {
 
     local force_term="TERM=xterm-256color FORCE_COLOR=1 CLICOLOR_FORCE=1 GOTOOLCHAIN=${GOTOOLCHAIN} PATH=${PATH}"
     local typed_cmd="just demo ${demo}"
-    local inner="cd $sandbox && echo '\$ $typed_cmd' && sleep 0.6 && cd '$PROJECT_DIR' && $typed_cmd"
+    local bin
+    bin="$(bin_name_for "$demo")"
+    local inner="cd $sandbox && echo '\$ $typed_cmd' && sleep 0.6 && '$PROJECT_DIR/bin/$bin'"
 
     asciinema rec "$cast_file" \
         --overwrite \

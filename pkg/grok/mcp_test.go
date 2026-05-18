@@ -1,6 +1,7 @@
 package grok
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -14,8 +15,14 @@ func TestParseMCPList_Fixture(t *testing.T) {
 		t.Skip("fixture not yet captured")
 	}
 	got := parseMCPList(data)
+	if bytes.HasPrefix(bytes.TrimSpace(data), []byte("No MCP servers configured")) {
+		if len(got) != 0 {
+			t.Fatalf("empty-state fixture should parse to 0 servers, got %d: %#v", len(got), got)
+		}
+		return
+	}
 	if len(got) == 0 {
-		t.Fatal("no servers parsed")
+		t.Fatal("no servers parsed from populated fixture")
 	}
 }
 
@@ -30,6 +37,14 @@ func TestParseMCPList_Inline(t *testing.T) {
 	}
 	if got[1].Name != "beta" || got[1].URL != "https://example.invalid" || got[1].Transport != MCPTransportHTTP {
 		t.Fatalf("beta mismatch: %#v", got[1])
+	}
+}
+
+func TestParseMCPList_EmptyState(t *testing.T) {
+	in := []byte("No MCP servers configured. Run `grok mcp add --help` to get started.\n")
+	got := parseMCPList(in)
+	if len(got) != 0 {
+		t.Fatalf("got %d servers, want 0: %#v", len(got), got)
 	}
 }
 
