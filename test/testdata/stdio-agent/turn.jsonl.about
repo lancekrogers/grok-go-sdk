@@ -1,4 +1,0 @@
-captured: 2026-05-16
-binary: grok 0.1.210/0.1.211 (8b63e9068c)
-note: partial capture; client attempted newSession/prompt methods which returned -32601 method-not-found. Real method names need to be discovered from the agent's published schema. Initialize handshake succeeded. The remaining lines are method-not-found errors and capture the JSON-RPC error envelope shape.
-followup: discover correct method names (sendMessage? sendPrompt? sendRequest?) for full-turn capture.

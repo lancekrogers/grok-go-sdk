@@ -8,7 +8,7 @@ produce useful output against a real `grok` install, the SDK is broken.
 
 - `grok` installed on PATH and authenticated via `grok login`.
 - `just` to run the recipes.
-- `go` 1.26.1+ to build the examples.
+- Go 1.24 or newer to build the examples.
 
 ## Available demos
 
@@ -24,9 +24,10 @@ produce useful output against a real `grok` install, the SDK is broken.
 | [Best-of-N](#best-of-n)         | 4-way headless race                       | `just demo best-of-n`        | no (4x cost)       |
 | [Check loop](#check-loop)       | Self-verifying response                   | `just demo check-loop`       | no (slow)          |
 | [Agent runtime](#agent-runtime) | Embedded REPL with plugins + budget       | `just demo agent-runtime`    | no (REPL)          |
+| [Dangerous](#dangerous)         | Explicit opt-in bypass helper             | `just demo dangerous`        | no (guarded)       |
 
-The `pkg/grok/dangerous` subpackage is intentionally excluded so users do
-not accidentally invoke bypass shortcuts.
+The `pkg/grok/dangerous` demo is guarded by `GROK_ENABLE_DANGEROUS` so users
+do not accidentally invoke bypass shortcuts.
 
 ## GIF generation
 
@@ -213,3 +214,21 @@ Run it: `just demo agent-runtime`
 Not in the default GIF set: REPL; GIF requires the
 `scripts/demo-expect/agent-runtime.exp` script which drives two short
 turns then closes stdin.
+
+---
+
+## Dangerous
+
+**Explicit opt-in bypass helper.**
+
+Demonstrates the `pkg/grok/dangerous` guard and `BypassAllPermissions`
+helper. The recipe refuses to run unless the sentinel environment variable is
+set and the process is not in a production environment.
+
+Run it:
+
+```
+GROK_ENABLE_DANGEROUS="i-accept-all-risks" just demo dangerous
+```
+
+Not in the default GIF set: guarded unsafe mode.

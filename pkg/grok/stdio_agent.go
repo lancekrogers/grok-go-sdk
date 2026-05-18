@@ -35,9 +35,11 @@ type StdioSession struct {
 	notifCh   chan RPCMessage
 	errsCh    chan error
 	closed    chan struct{}
+	readDone  chan struct{}
 
-	closeOnce    sync.Once
-	shutdownOnce sync.Once
+	closeOnce   sync.Once
+	closedOnce  sync.Once
+	streamsOnce sync.Once
 }
 
 func (c *GrokClient) StartStdioAgent(ctx context.Context, cfg *StdioConfig) (*StdioSession, error) {
@@ -67,6 +69,7 @@ func (c *GrokClient) StartStdioAgent(ctx context.Context, cfg *StdioConfig) (*St
 		notifCh:   make(chan RPCMessage, 32),
 		errsCh:    make(chan error, 4),
 		closed:    make(chan struct{}),
+		readDone:  make(chan struct{}),
 	}
 	go s.readLoop()
 	return s, nil
@@ -200,7 +203,11 @@ func (s *StdioSession) PromptText(ctx context.Context, sessionID, text string) (
 }
 
 func (s *StdioSession) readLoop() {
-	defer s.shutdown()
+	defer func() {
+		s.signalClosed()
+		s.closeStreams()
+		close(s.readDone)
+	}()
 	sc := bufio.NewScanner(s.stdout)
 	sc.Buffer(make([]byte, 64*1024), 1024*1024)
 	for sc.Scan() {
@@ -294,6 +301,7 @@ func (s *StdioSession) sendErr(err error) {
 func (s *StdioSession) Close() error {
 	var closeErr error
 	s.closeOnce.Do(func() {
+		s.signalClosed()
 		_ = s.stdin.Close()
 		done := make(chan struct{})
 		go func() {
@@ -315,14 +323,19 @@ func (s *StdioSession) Close() error {
 				<-done
 			}
 		}
-		s.shutdown()
+		<-s.readDone
 	})
 	return closeErr
 }
 
-func (s *StdioSession) shutdown() {
-	s.shutdownOnce.Do(func() {
+func (s *StdioSession) signalClosed() {
+	s.closedOnce.Do(func() {
 		close(s.closed)
+	})
+}
+
+func (s *StdioSession) closeStreams() {
+	s.streamsOnce.Do(func() {
 		close(s.updatesCh)
 		close(s.notifCh)
 		close(s.errsCh)

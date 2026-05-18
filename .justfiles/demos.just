@@ -104,10 +104,7 @@ build-agent-runtime:
     @just build agent-runtime
 
 build-dangerous:
-    @echo "Building dangerous example..."
-    @mkdir -p {{BIN_DIR}}
-    cd {{PROJECT_DIR}} && go build -o {{BIN_DIR}}/dangerous_example ./examples/dangerous
-    @echo "Built: {{BIN_DIR}}/dangerous_example"
+    @just build dangerous-example
 
 # Build all demos
 build-all: build-basic build-streaming build-sessions build-mcp build-agent-stdio build-worktree build-best-of-n build-check-loop build-subagents build-agent-runtime

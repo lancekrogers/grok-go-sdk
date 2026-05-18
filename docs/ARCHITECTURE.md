@@ -1,11 +1,9 @@
 ## Module
 
 - Module path: `github.com/lancekrogers/grok-go-sdk`
-- Go version: pinned at the latest stable release available at scaffold time;
-  re-verify in [09-execution-plan.md](09-execution-plan.md).
+- Go version: `1.24` in `go.mod`.
 - License: MIT.
-- Visibility: private at creation, flipped public when the API has been
-  exercised by an internal consumer and at least one external user.
+- Visibility: public.
 
 ## Package Layout
 
@@ -16,11 +14,14 @@ grok-go-sdk/
 ├── LICENSE
 ├── README.md
 ├── justfile
-├── justfiles/
+├── .justfiles/
 │   ├── build.just
 │   ├── test.just
-│   ├── lint.just
-│   └── demo.just
+│   ├── coverage.just
+│   ├── demos.just
+│   ├── mock.just
+│   ├── releases.just
+│   └── util.just
 ├── pkg/
 │   └── grok/
 │       ├── grok.go               # Client, RunPrompt, RunPromptCtx
@@ -65,7 +66,7 @@ grok-go-sdk/
 │       └── dangerous/
 │           ├── doc.go
 │           ├── dangerous.go      # --always-approve, bypassPermissions, sandbox=off
-│           └── README.md         # CLAUDE_ENABLE_DANGEROUS-style guard
+│           └── README.md         # GROK_ENABLE_DANGEROUS guard
 ├── examples/
 │   ├── basic/
 │   ├── streaming/
@@ -76,7 +77,8 @@ grok-go-sdk/
 │   ├── best_of_n/
 │   ├── check_loop/
 │   ├── subagents/
-│   └── agent_runtime/            # embedded long-running agent host
+│   ├── agent_runtime/            # embedded long-running agent host
+│   └── dangerous/                # guarded dangerous-package demo
 ├── test/
 │   ├── integration/              # build tag: integration, real grok binary
 │   ├── mockserver/               # fake grok binary used by unit tests
@@ -135,8 +137,7 @@ All errors returned by public methods are either `*GrokError` (process,
 auth, rate-limit, validation) or wrapped context errors. `GrokError`
 implements `IsRetryable()` and exposes `Type` (`auth`, `rate_limit`,
 `process`, `validation`, `transport`, `unknown`). Mirrors the
-`claude-code-go` `ClaudeError`. See [04-api-surface.md](04-api-surface.md)
-for the exact types.
+`claude-code-go` `ClaudeError` taxonomy.
 
 ## Exec Surface
 

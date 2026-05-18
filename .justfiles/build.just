@@ -33,7 +33,7 @@ mock:
     @echo "Built: test/mockserver/bin/grok-mock"
 
 # Build all examples
-examples: basic streaming sessions mcp agent-stdio worktree best-of-n check-loop subagents agent-runtime
+examples: basic streaming sessions mcp agent-stdio worktree best-of-n check-loop subagents agent-runtime dangerous-example
     @echo "All examples built"
 
 # Build basic example
@@ -106,3 +106,10 @@ agent-runtime:
     @mkdir -p {{BIN_DIR}}
     cd {{PROJECT_DIR}} && go build -o {{BIN_DIR}}/agent_runtime ./examples/agent_runtime
     @echo "Built: {{BIN_DIR}}/agent_runtime"
+
+# Build dangerous example
+dangerous-example:
+    @echo "Building dangerous example..."
+    @mkdir -p {{BIN_DIR}}
+    cd {{PROJECT_DIR}} && go build -o {{BIN_DIR}}/dangerous_example ./examples/dangerous
+    @echo "Built: {{BIN_DIR}}/dangerous_example"

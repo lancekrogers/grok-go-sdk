@@ -30,6 +30,7 @@ test/mockserver/bin/
 /mockserver
 /grok-mock
 /main
+/dangerous
 
 # Trace exports
 trace-exports/

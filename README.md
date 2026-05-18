@@ -80,7 +80,7 @@ func main() {
 
 ## Prerequisites
 
-- Go (latest stable; this module targets `go1.26.1`).
+- Go 1.24 or newer.
 - The [grok CLI](https://github.com/xai-org/grok) installed and authenticated via `grok login`.
 - xAI API access for the real-binary lane (mock binary works offline).
 - [just](https://github.com/casey/just) for running project commands.
