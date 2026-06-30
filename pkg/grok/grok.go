@@ -281,6 +281,9 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 		} else {
 			args = append(args, "-w")
 		}
+		if opts.Worktree.Ref != "" {
+			args = append(args, "--worktree-ref", opts.Worktree.Ref)
+		}
 	}
 
 	if opts.Model != "" {

@@ -38,6 +38,9 @@ const (
 type WorktreeOption struct {
 	Enabled bool
 	Name    string
+	// Ref is the branch, tag, or commit to base the new worktree on
+	// (--worktree-ref). Defaults to the source checkout's HEAD when empty.
+	Ref string
 }
 
 type SubagentConfig struct {

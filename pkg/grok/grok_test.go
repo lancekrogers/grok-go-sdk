@@ -41,6 +41,7 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"cwd", "x", &RunOptions{WorkingDirectory: "/tmp"}, []string{"--cwd", "/tmp"}},
 		{"worktree named", "x", &RunOptions{Worktree: WorktreeOption{Enabled: true, Name: "wt1"}}, []string{"-w", "wt1"}},
 		{"worktree bare", "x", &RunOptions{Worktree: WorktreeOption{Enabled: true}}, []string{"-w"}},
+		{"worktree with ref", "x", &RunOptions{Worktree: WorktreeOption{Enabled: true, Name: "wt1", Ref: "main"}}, []string{"-w", "wt1", "--worktree-ref", "main"}},
 		{"model", "x", &RunOptions{Model: "grok-build"}, []string{"--model", "grok-build"}},
 		{"effort", "x", &RunOptions{Effort: EffortHigh}, []string{"--effort", "high"}},
 		{"reasoning effort", "x", &RunOptions{ReasoningEffort: "high"}, []string{"--reasoning-effort", "high"}},
