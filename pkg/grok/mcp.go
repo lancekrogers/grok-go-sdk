@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"sort"
 	"strings"
 )
 
@@ -16,13 +17,25 @@ const (
 	MCPTransportSSE   MCPTransport = "sse"
 )
 
+type MCPScope string
+
+const (
+	MCPScopeUser    MCPScope = "user"
+	MCPScopeProject MCPScope = "project"
+)
+
+// MCPServerConfig describes an MCP server for `grok mcp add`.
+//
+// grok 0.2.77 uses a positional interface: a server name plus a single
+// command-or-URL positional, with the server's own arguments after `--`.
 type MCPServerConfig struct {
-	Name      string
-	Command   string
-	Args      []string
-	Env       map[string]string
-	URL       string
-	Transport MCPTransport
+	Name         string
+	CommandOrURL string            // command to launch (stdio) or URL to connect to (http/sse)
+	Args         []string          // server command arguments, emitted after `--`
+	Transport    MCPTransport      // -t/--transport (defaults to stdio when empty)
+	Scope        MCPScope          // -s/--scope (defaults to user when empty)
+	Env          map[string]string // -e KEY=value (repeatable)
+	Headers      map[string]string // -H "Name: Value" (repeatable, remote transports)
 }
 
 func (c *GrokClient) MCPList(ctx context.Context) ([]MCPServerConfig, error) {
@@ -37,25 +50,36 @@ func (c *GrokClient) MCPAdd(ctx context.Context, cfg MCPServerConfig) error {
 	if cfg.Name == "" {
 		return errors.New("mcp add: name required")
 	}
-	args := []string{"mcp", "add", cfg.Name}
-	if cfg.Command != "" {
-		args = append(args, "--command", cfg.Command)
+	_, err := c.runSubcommand(ctx, mcpAddArgs(cfg))
+	return err
+}
+
+// mcpAddArgs builds the argv for `grok mcp add` (0.2.77 positional interface):
+//
+//	mcp add [-t T] [-s S] [-e K=V...] [-H "N: V"...] <name> <commandOrURL> -- <args...>
+func mcpAddArgs(cfg MCPServerConfig) []string {
+	args := []string{"mcp", "add"}
+	if cfg.Transport != "" {
+		args = append(args, "-t", string(cfg.Transport))
+	}
+	if cfg.Scope != "" {
+		args = append(args, "-s", string(cfg.Scope))
+	}
+	for _, k := range sortedKeys(cfg.Env) {
+		args = append(args, "-e", k+"="+cfg.Env[k])
+	}
+	for _, k := range sortedKeys(cfg.Headers) {
+		args = append(args, "-H", k+": "+cfg.Headers[k])
+	}
+	args = append(args, cfg.Name)
+	if cfg.CommandOrURL != "" {
+		args = append(args, cfg.CommandOrURL)
 	}
 	if len(cfg.Args) > 0 {
-		args = append(args, "--args")
+		args = append(args, "--")
 		args = append(args, cfg.Args...)
 	}
-	for k, v := range cfg.Env {
-		args = append(args, "--env", k+"="+v)
-	}
-	if cfg.URL != "" {
-		args = append(args, "--url", cfg.URL)
-	}
-	if cfg.Transport != "" {
-		args = append(args, "--type", string(cfg.Transport))
-	}
-	_, err := c.runSubcommand(ctx, args)
-	return err
+	return args
 }
 
 func (c *GrokClient) MCPRemove(ctx context.Context, name string) error {
@@ -71,44 +95,44 @@ func (c *GrokClient) MCPDoctor(ctx context.Context) (string, error) {
 	return string(out), err
 }
 
+// sortedKeys returns the map keys in deterministic order so emitted argv is stable.
+func sortedKeys(m map[string]string) []string {
+	if len(m) == 0 {
+		return nil
+	}
+	ks := make([]string, 0, len(m))
+	for k := range m {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+	return ks
+}
+
+// parseMCPList parses `grok mcp list` output. The 0.2.77 format is one line per
+// server, "<name>: <command-or-url>"; the empty state is a single
+// "No MCP servers configured" line.
 func parseMCPList(b []byte) []MCPServerConfig {
-	if bytes.HasPrefix(bytes.TrimSpace(b), []byte("No MCP servers configured")) {
+	trimmed := bytes.TrimSpace(b)
+	if len(trimmed) == 0 || bytes.HasPrefix(trimmed, []byte("No MCP servers configured")) {
 		return nil
 	}
 	var out []MCPServerConfig
 	sc := bufio.NewScanner(bytes.NewReader(b))
-	var cur *MCPServerConfig
 	for sc.Scan() {
-		line := sc.Text()
-		trim := strings.TrimSpace(line)
-		if trim == "" {
-			if cur != nil {
-				out = append(out, *cur)
-				cur = nil
-			}
+		line := strings.TrimSpace(sc.Text())
+		if line == "" {
 			continue
 		}
-		if !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "\t") {
-			if cur != nil {
-				out = append(out, *cur)
-			}
-			cur = &MCPServerConfig{Name: trim}
+		idx := strings.Index(line, ":")
+		if idx <= 0 {
 			continue
 		}
-		if cur == nil {
+		name := strings.TrimSpace(line[:idx])
+		val := strings.TrimSpace(line[idx+1:])
+		if name == "" {
 			continue
 		}
-		switch {
-		case strings.HasPrefix(trim, "command:"):
-			cur.Command = strings.TrimSpace(strings.TrimPrefix(trim, "command:"))
-		case strings.HasPrefix(trim, "url:"):
-			cur.URL = strings.TrimSpace(strings.TrimPrefix(trim, "url:"))
-		case strings.HasPrefix(trim, "transport:"):
-			cur.Transport = MCPTransport(strings.TrimSpace(strings.TrimPrefix(trim, "transport:")))
-		}
-	}
-	if cur != nil {
-		out = append(out, *cur)
+		out = append(out, MCPServerConfig{Name: name, CommandOrURL: val})
 	}
 	return out
 }
