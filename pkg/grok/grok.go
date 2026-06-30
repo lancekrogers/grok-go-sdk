@@ -204,9 +204,6 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.Format != "" {
 		args = append(args, "--output-format", string(opts.Format))
 	}
-	if opts.InputFormat != "" {
-		args = append(args, "--input-format", string(opts.InputFormat))
-	}
 
 	if opts.Agent != "" {
 		args = append(args, "--agent", opts.Agent)
@@ -313,16 +310,6 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	}
 	if opts.Verbatim {
 		args = append(args, "--verbatim")
-	}
-
-	for _, mc := range opts.MCPConfigs {
-		args = append(args, "--mcp-config", mc)
-	}
-	if opts.MCPConfigPath != "" && len(opts.MCPConfigs) == 0 {
-		args = append(args, "--mcp-config", opts.MCPConfigPath)
-	}
-	if opts.StrictMCPConfig {
-		args = append(args, "--strict-mcp-config")
 	}
 
 	if opts.OAuth {

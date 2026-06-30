@@ -14,13 +14,6 @@ const (
 	StreamingJSONOutput OutputFormat = "streaming-json"
 )
 
-type InputFormat string
-
-const (
-	TextInput       InputFormat = "text"
-	StreamJSONInput InputFormat = "stream-json"
-)
-
 type EffortLevel string
 
 const (
@@ -56,8 +49,7 @@ type SubagentConfig struct {
 }
 
 type RunOptions struct {
-	Format      OutputFormat
-	InputFormat InputFormat
+	Format OutputFormat
 
 	Prompt               string
 	PromptFile           string
@@ -105,10 +97,6 @@ type RunOptions struct {
 	Check       bool
 	NoPlan      bool
 	NoAltScreen bool
-
-	MCPConfigPath   string
-	MCPConfigs      []string
-	StrictMCPConfig bool
 
 	OAuth bool
 
@@ -189,9 +177,6 @@ func cloneRunOptions(opts *RunOptions) *RunOptions {
 	}
 	if opts.DisallowedTools != nil {
 		cp.DisallowedTools = append([]string(nil), opts.DisallowedTools...)
-	}
-	if opts.MCPConfigs != nil {
-		cp.MCPConfigs = append([]string(nil), opts.MCPConfigs...)
 	}
 	if opts.Env != nil {
 		cp.Env = append([]string(nil), opts.Env...)

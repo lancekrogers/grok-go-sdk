@@ -18,7 +18,6 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"prompt json", "", &RunOptions{PromptJSON: `{"k":"v"}`}, []string{"--prompt-json", `{"k":"v"}`}},
 		{"json format", "x", &RunOptions{Format: JSONOutput}, []string{"--output-format", "json"}},
 		{"streaming format", "x", &RunOptions{Format: StreamingJSONOutput}, []string{"--output-format", "streaming-json"}},
-		{"input format", "x", &RunOptions{InputFormat: StreamJSONInput}, []string{"--input-format", "stream-json"}},
 		{"agent name", "x", &RunOptions{Agent: "security"}, []string{"--agent", "security"}},
 		{"agent file fallback", "x", &RunOptions{AgentDefinitionFile: "/tmp/a.json"}, []string{"--agent", "/tmp/a.json"}},
 		{"agents json raw", "x", &RunOptions{AgentsJSON: `{"x":1}`}, []string{"--agents", `{"x":1}`}},
@@ -52,9 +51,6 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"rules inline", "x", &RunOptions{Rules: "be terse"}, []string{"--rules", "be terse"}},
 		{"rules file", "x", &RunOptions{RulesFile: "/tmp/r.txt"}, []string{"--rules", "@/tmp/r.txt"}},
 		{"verbatim", "x", &RunOptions{Verbatim: true}, []string{"--verbatim"}},
-		{"mcp config single", "x", &RunOptions{MCPConfigPath: "/tmp/m.json"}, []string{"--mcp-config", "/tmp/m.json"}},
-		{"mcp config multi", "x", &RunOptions{MCPConfigs: []string{"a.json", "b.json"}}, []string{"--mcp-config", "a.json", "--mcp-config", "b.json"}},
-		{"strict mcp", "x", &RunOptions{StrictMCPConfig: true}, []string{"--strict-mcp-config"}},
 		{"oauth", "x", &RunOptions{OAuth: true}, []string{"--oauth"}},
 	}
 

@@ -12,8 +12,6 @@ func TestEnumConstants(t *testing.T) {
 		{string(PlainOutput), "plain"},
 		{string(JSONOutput), "json"},
 		{string(StreamingJSONOutput), "streaming-json"},
-		{string(TextInput), "text"},
-		{string(StreamJSONInput), "stream-json"},
 		{string(EffortLow), "low"},
 		{string(EffortMedium), "medium"},
 		{string(EffortHigh), "high"},

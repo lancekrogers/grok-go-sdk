@@ -10,8 +10,7 @@ func TestRunFromStdin_AgainstMock(t *testing.T) {
 	c := NewClient(mock)
 	transcript := strings.NewReader(`{"role":"user","content":"summarize"}` + "\n")
 	res, err := c.RunFromStdin(transcript, "", &RunOptions{
-		InputFormat: StreamJSONInput,
-		Format:      JSONOutput,
+		Format: JSONOutput,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
