@@ -89,6 +89,32 @@ func TestBuildArgs_AllowDenyOrder(t *testing.T) {
 	}
 }
 
+func TestBuildArgs_JSONSchema(t *testing.T) {
+	schema := "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\"type\": \"string\"}\n  }\n}"
+	opts := &RunOptions{Prompt: "x", JSONSchema: schema}
+	if err := PreprocessOptions(opts); err != nil {
+		t.Fatalf("preprocess: %v", err)
+	}
+	if opts.Format != JSONOutput {
+		t.Fatalf("JSONSchema should imply JSONOutput, got %q", opts.Format)
+	}
+	args := BuildArgs("x", opts)
+	if !contains(args, "--output-format") || !contains(args, "json") {
+		t.Fatalf("missing implied --output-format json: %v", args)
+	}
+	// The schema must travel as a single argv element, never split on its newlines.
+	pos := -1
+	for i, a := range args {
+		if a == "--json-schema" {
+			pos = i
+			break
+		}
+	}
+	if pos < 0 || pos+1 >= len(args) || args[pos+1] != schema {
+		t.Fatalf("schema not passed as a single argv element: %v", args)
+	}
+}
+
 func TestBuildArgs_PromptSourcePrecedence(t *testing.T) {
 	args := BuildArgs("from-arg", &RunOptions{Prompt: "from-opts", PromptFile: "/f"})
 	if !contains(args, "--prompt-file") {

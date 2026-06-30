@@ -204,6 +204,9 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.Format != "" {
 		args = append(args, "--output-format", string(opts.Format))
 	}
+	if opts.JSONSchema != "" {
+		args = append(args, "--json-schema", opts.JSONSchema)
+	}
 
 	if opts.Agent != "" {
 		args = append(args, "--agent", opts.Agent)

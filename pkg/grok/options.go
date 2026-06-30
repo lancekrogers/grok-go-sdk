@@ -51,6 +51,11 @@ type SubagentConfig struct {
 type RunOptions struct {
 	Format OutputFormat
 
+	// JSONSchema constrains the model to emit JSON matching this schema.
+	// When set, the binary implies --output-format json, so PreprocessOptions
+	// defaults Format to JSONOutput.
+	JSONSchema string
+
 	Prompt               string
 	PromptFile           string
 	PromptJSON           string
@@ -142,6 +147,9 @@ func PreprocessOptions(opts *RunOptions) error {
 		return err
 	}
 
+	if opts.JSONSchema != "" && (opts.Format == "" || opts.Format == PlainOutput) {
+		opts.Format = JSONOutput
+	}
 	if opts.Format == "" {
 		opts.Format = PlainOutput
 	}
