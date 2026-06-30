@@ -168,7 +168,7 @@ func doSessions(args []string) int {
 
 func doInspect(args []string) int {
 	if flagSet(args, "--json") {
-		fmt.Println(`{"version":"mock","cwd":"/tmp","git_root":"/tmp","project_trusted":true,"project_instructions":[],"permissions":{},"skills":[]}`)
+		fmt.Println(`{"grokVersion":"mock","channel":"stable","cwd":"/tmp","projectRoot":"/tmp/","projectTrusted":true,"bridgeTrusted":true,"projectInstructions":[],"permissions":{},"loginPolicy":{},"hooks":[],"skills":[],"agents":[],"plugins":[],"marketplaces":[],"mcpServers":[],"lspServers":[],"configSources":{},"externalCompat":{}}`)
 		return 0
 	}
 	fmt.Println("Mock inspect output (use --json for machine-readable)")
