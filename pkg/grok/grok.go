@@ -255,6 +255,12 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.RestoreCode {
 		args = append(args, "--restore-code")
 	}
+	if opts.ForkSession {
+		args = append(args, "--fork-session")
+	}
+	if opts.SessionID != "" {
+		args = append(args, "-s", opts.SessionID)
+	}
 
 	if opts.NoMemory {
 		args = append(args, "--no-memory")

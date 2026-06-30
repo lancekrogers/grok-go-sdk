@@ -127,8 +127,12 @@ func PreprocessOptions(opts *RunOptions) error {
 	if opts.RestoreCode && opts.ResumeID == "" {
 		return fmt.Errorf("validation: RestoreCode requires ResumeID")
 	}
-	if opts.ForkSession {
-		return fmt.Errorf("validation: ForkSession not yet supported by grok CLI")
+	resuming := opts.ResumeID != "" || opts.Continue
+	if opts.ForkSession && !resuming {
+		return fmt.Errorf("validation: ForkSession only valid with ResumeID or Continue")
+	}
+	if opts.SessionID != "" && resuming && !opts.ForkSession {
+		return fmt.Errorf("validation: SessionID with ResumeID/Continue requires ForkSession")
 	}
 
 	if err := validateRules(opts.AllowRules, "AllowRules"); err != nil {

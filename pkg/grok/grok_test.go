@@ -34,6 +34,8 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"resume id", "x", &RunOptions{ResumeID: "abc"}, []string{"--resume", "abc"}},
 		{"continue", "x", &RunOptions{Continue: true}, []string{"--continue"}},
 		{"restore code", "x", &RunOptions{ResumeID: "abc", RestoreCode: true}, []string{"--restore-code"}},
+		{"session id alone", "x", &RunOptions{SessionID: "uuid-1"}, []string{"-s", "uuid-1"}},
+		{"fork with resume", "x", &RunOptions{ResumeID: "abc", ForkSession: true, SessionID: "uuid-2"}, []string{"--resume", "abc", "--fork-session", "-s", "uuid-2"}},
 		{"no memory", "x", &RunOptions{NoMemory: true}, []string{"--no-memory"}},
 		{"experimental memory", "x", &RunOptions{ExperimentalMemory: true}, []string{"--experimental-memory"}},
 		{"cwd", "x", &RunOptions{WorkingDirectory: "/tmp"}, []string{"--cwd", "/tmp"}},

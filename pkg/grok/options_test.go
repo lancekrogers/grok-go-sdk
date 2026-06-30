@@ -114,10 +114,22 @@ func TestPreprocessOptions_EnvPermissiveSandboxRequiresDangerous(t *testing.T) {
 	}
 }
 
-func TestPreprocessOptions_ForkRejected(t *testing.T) {
-	err := PreprocessOptions(&RunOptions{Prompt: "x", ForkSession: true})
-	if err == nil {
-		t.Fatal("expected error (fork not supported yet)")
+func TestPreprocessOptions_ForkRequiresResume(t *testing.T) {
+	// ForkSession only makes sense when resuming/continuing.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", ForkSession: true}); err == nil {
+		t.Fatal("expected error: ForkSession without resume/continue")
+	}
+	// SessionID alone (new conversation) is fine.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", SessionID: "uuid-1"}); err != nil {
+		t.Fatalf("SessionID alone should be valid: %v", err)
+	}
+	// Resume + SessionID without ForkSession is rejected.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", ResumeID: "abc", SessionID: "uuid-2"}); err == nil {
+		t.Fatal("expected error: SessionID + resume without ForkSession")
+	}
+	// Resume + ForkSession + SessionID is valid.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", ResumeID: "abc", ForkSession: true, SessionID: "uuid-2"}); err != nil {
+		t.Fatalf("resume + fork + session-id should be valid: %v", err)
 	}
 }
 
