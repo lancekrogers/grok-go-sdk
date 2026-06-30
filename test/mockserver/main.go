@@ -71,6 +71,8 @@ func route(args []string) int {
 		return 0
 	case "login":
 		return 0
+	case "logout":
+		return 0
 	case "agent":
 		return doAgent(args[1:])
 	case "leader":
@@ -162,6 +164,8 @@ func doSessions(args []string) int {
 	switch args[0] {
 	case "list", "search":
 		fmt.Println("mock-session-01HMOCK0000000000000000000\t2026-05-16T02:00:00Z\t/tmp\tmock summary")
+	case "delete":
+		// success, no output
 	}
 	return 0
 }

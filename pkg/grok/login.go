@@ -36,3 +36,9 @@ func (c *GrokClient) Login(ctx context.Context, mode LoginMode) error {
 	}
 	return nil
 }
+
+// Logout signs out and clears cached credentials (grok logout).
+func (c *GrokClient) Logout(ctx context.Context) error {
+	_, err := c.runSubcommand(ctx, []string{"logout"})
+	return err
+}

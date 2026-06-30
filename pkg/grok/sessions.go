@@ -40,6 +40,15 @@ func (c *GrokClient) SessionsSearch(ctx context.Context, query string, limit int
 	return parseSessions(out), nil
 }
 
+// SessionsDelete permanently deletes a session from history (sessions delete <id>).
+func (c *GrokClient) SessionsDelete(ctx context.Context, id string) error {
+	if id == "" {
+		return &GrokError{Type: ErrorValidation, Message: "sessions delete: id required"}
+	}
+	_, err := c.runSubcommand(ctx, []string{"sessions", "delete", id})
+	return err
+}
+
 func parseSessions(data []byte) []SessionSummary {
 	var out []SessionSummary
 	sc := bufio.NewScanner(bytes.NewReader(data))
