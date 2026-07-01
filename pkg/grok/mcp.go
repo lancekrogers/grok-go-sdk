@@ -82,16 +82,33 @@ func mcpAddArgs(cfg MCPServerConfig) []string {
 	return args
 }
 
-func (c *GrokClient) MCPRemove(ctx context.Context, name string) error {
+// MCPRemove removes an MCP server. An empty scope searches all scopes (the
+// binary's default); otherwise it targets user or project config.
+func (c *GrokClient) MCPRemove(ctx context.Context, name string, scope MCPScope) error {
 	if name == "" {
 		return errors.New("mcp remove: name required")
 	}
-	_, err := c.runSubcommand(ctx, []string{"mcp", "remove", name})
+	args := []string{"mcp", "remove"}
+	if scope != "" {
+		args = append(args, "-s", string(scope))
+	}
+	args = append(args, name)
+	_, err := c.runSubcommand(ctx, args)
 	return err
 }
 
-func (c *GrokClient) MCPDoctor(ctx context.Context) (string, error) {
-	out, err := c.runSubcommandTolerant(ctx, []string{"mcp", "doctor"})
+// MCPDoctor diagnoses MCP configuration/connectivity. An empty name checks all
+// servers; asJSON requests machine-readable output. It is tolerant of a
+// non-zero exit so the caller still receives the report alongside any error.
+func (c *GrokClient) MCPDoctor(ctx context.Context, name string, asJSON bool) (string, error) {
+	args := []string{"mcp", "doctor"}
+	if name != "" {
+		args = append(args, name)
+	}
+	if asJSON {
+		args = append(args, "--json")
+	}
+	out, err := c.runSubcommandTolerant(ctx, args)
 	return string(out), err
 }
 

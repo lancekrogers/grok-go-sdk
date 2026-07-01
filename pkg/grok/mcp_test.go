@@ -77,7 +77,7 @@ func TestParseMCPList_EmptyState(t *testing.T) {
 
 func TestMCPRemove_EmptyName(t *testing.T) {
 	c := NewClient("/nonexistent")
-	if err := c.MCPRemove(context.Background(), ""); err == nil {
+	if err := c.MCPRemove(context.Background(), "", ""); err == nil {
 		t.Fatal("expected error")
 	}
 }

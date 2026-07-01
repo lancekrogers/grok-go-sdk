@@ -22,7 +22,7 @@ func main() {
 	for _, s := range servers {
 		fmt.Printf("  - %s: %s\n", s.Name, s.CommandOrURL)
 	}
-	report, err := c.MCPDoctor(ctx)
+	report, err := c.MCPDoctor(ctx, "", false)
 	fmt.Println("\n--- mcp doctor ---")
 	if report != "" {
 		fmt.Println(report)

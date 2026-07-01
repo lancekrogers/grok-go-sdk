@@ -21,7 +21,7 @@ func TestMCPDoctor(t *testing.T) {
 	c := newClient(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	report, err := c.MCPDoctor(ctx)
+	report, err := c.MCPDoctor(ctx, "", false)
 	// doctor reports problems by writing a useful stdout report and exiting non-zero.
 	// MCPDoctor returns both so callers can present the report alongside the error.
 	if report == "" && err != nil {

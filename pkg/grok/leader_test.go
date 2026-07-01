@@ -30,7 +30,7 @@ func TestLeaderKill_AgainstMock(t *testing.T) {
 func TestLeaderProfile_AgainstMock(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
-	if err := c.LeaderProfileStart(context.Background(), 1234); err != nil {
+	if err := c.LeaderProfileStart(context.Background(), 1234, LeaderProfileStartOptions{}); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 	if err := c.LeaderProfileStop(context.Background(), 1234); err != nil {

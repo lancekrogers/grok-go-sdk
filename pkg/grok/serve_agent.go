@@ -45,10 +45,7 @@ type ServeAgent struct {
 
 var listeningRe = regexp.MustCompile(`listening on ([0-9A-Fa-f:.\[\]]+:[0-9]+)`)
 
-func (c *GrokClient) StartServeAgent(ctx context.Context, cfg *ServeAgentConfig) (*ServeAgent, error) {
-	if cfg == nil {
-		cfg = &ServeAgentConfig{}
-	}
+func serveArgs(cfg *ServeAgentConfig) []string {
 	args := []string{"agent", "serve"}
 	if cfg.Bind != "" {
 		args = append(args, "--bind", cfg.Bind)
@@ -65,8 +62,14 @@ func (c *GrokClient) StartServeAgent(ctx context.Context, cfg *ServeAgentConfig)
 	if cfg.GrokWSURL != "" {
 		args = append(args, "--grok-ws-url", cfg.GrokWSURL)
 	}
+	return args
+}
 
-	cmd := execCommand(ctx, c.BinPath, args...)
+func (c *GrokClient) StartServeAgent(ctx context.Context, cfg *ServeAgentConfig) (*ServeAgent, error) {
+	if cfg == nil {
+		cfg = &ServeAgentConfig{}
+	}
+	cmd := execCommand(ctx, c.BinPath, serveArgs(cfg)...)
 	stderr := &syncBuffer{}
 	cmd.Stderr = stderr
 	if err := cmd.Start(); err != nil {
