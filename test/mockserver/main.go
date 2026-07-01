@@ -53,6 +53,9 @@ func route(args []string) int {
 		return 0
 	case "import":
 		return 0
+	case "export":
+		fmt.Println("# Mock transcript\n\nhello")
+		return 0
 	case "inspect":
 		return doInspect(args[1:])
 	case "models":
