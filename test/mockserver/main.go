@@ -74,6 +74,9 @@ func route(args []string) int {
 		return doUpdate(args[1:])
 	case "setup":
 		return 0
+	case "completions":
+		fmt.Println("# mock completion script")
+		return 0
 	case "login":
 		return 0
 	case "logout":

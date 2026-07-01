@@ -45,6 +45,14 @@ retry policies.
 - `BudgetTracker` with warning/exceeded callbacks.
 - `RetryPolicy` with backoff, jitter, and rate-limit honor.
 
+## Out of scope
+
+`grok wrap` (a PTY/clipboard passthrough that replaced the old `grok ssh`) and
+`grok dashboard` (an interactive TUI) are interactive, terminal-bound commands.
+They are intentionally **not** wrapped by this headless SDK — run the `grok`
+binary directly for those. Shell completion scripts are available via
+`Completions(ctx, shell)`.
+
 ## Installation
 
 ```
