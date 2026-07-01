@@ -66,6 +66,8 @@ func route(args []string) int {
 		return doMCP(args[1:])
 	case "memory":
 		return 0
+	case "plugin":
+		return doPlugin(args[1:])
 	case "worktree":
 		return doWorktree(args[1:])
 	case "update":
@@ -158,6 +160,25 @@ func locateTestdata() string {
 		}
 		d = parent
 	}
+}
+
+func doPlugin(args []string) int {
+	if len(args) == 0 {
+		return 0
+	}
+	switch args[0] {
+	case "list":
+		fmt.Println("mock-plugin v1.0 (enabled)")
+	case "details":
+		fmt.Println("Components: 1 command, 0 agents")
+	case "validate":
+		fmt.Println("Manifest OK")
+	case "marketplace":
+		if len(args) > 1 && args[1] == "list" {
+			fmt.Println("mock-marketplace: https://example.invalid/mp")
+		}
+	}
+	return 0
 }
 
 func doSessions(args []string) int {
