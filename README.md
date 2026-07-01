@@ -33,8 +33,9 @@ retry policies.
 
 ### Advanced
 - `StartStdioAgent`: full-duplex JSON-RPC-style session with `RequestResponse`.
-- `RunHeadlessAgent`, `StartServeAgent`, `LeaderList`/`Info`/`Kill`/`Profile*`.
-- Admin subcommand wrappers: `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Inspect`, `Models`, `Share`, `Trace`, `Import`, `SessionsList`/`Search`.
+- `RunHeadlessAgent`, `StartServeAgent`, `StartLeaderAgent`, `LeaderList`/`Info`/`Kill`/`Profile*`.
+- Admin subcommand wrappers: `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Logout`, `Inspect`, `Models`, `Export`, `Trace`, `Import`, `Completions`, `SessionsList`/`Search`/`Delete`.
+- `grok plugin` tree: `Plugin*` (install/uninstall/enable/…) and `Marketplace*` wrappers.
 - Permission rule validation + built-in tool name constants.
 - Sandbox-profile resolution + permissive heuristic.
 - Subagent JSON marshaling.
