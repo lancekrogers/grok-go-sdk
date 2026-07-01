@@ -213,7 +213,7 @@ opts := &grok.RunOptions{
 | `StartStdioAgent` | long-lived agent session |
 | `RunPromptWithRetry*` | retry-wrapped single-shot |
 | `ContinueConversation*`, `ResumeConversation*` | session helpers |
-| `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Inspect`, `Models`, `Share`, `Trace`, `Import`, `Sessions*`, `Leader*` | admin wrappers |
+| `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Logout`, `Inspect`, `Models`, `Export`, `Trace`, `Import`, `Completions`, `Sessions*`, `Plugin*`, `Marketplace*`, `Leader*` | admin wrappers |
 
 ## Security-Sensitive Features
 
