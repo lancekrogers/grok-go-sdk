@@ -99,6 +99,9 @@ func doPrompt(args []string) int {
 	case "json":
 		return emitFixture("json/" + scenario + ".json")
 	case "streaming-json":
+		if scenario == "say-hello" {
+			scenario = "basic"
+		}
 		return emitFixture("streaming-json/" + scenario + ".jsonl")
 	case "plain", "":
 		return emitPlain(scenario)
