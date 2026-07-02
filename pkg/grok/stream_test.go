@@ -1,8 +1,11 @@
 package grok
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -68,6 +71,47 @@ func TestParseEventLine_InvalidJSON(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
+}
+
+func TestParseEventLine_CapturedSayHelloFixture(t *testing.T) {
+	path := filepath.Join("..", "..", "test", "testdata", "streaming-json", "say-hello.jsonl")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Skipf("fixture not yet captured: %v", err)
+	}
+	lines := splitNonEmptyLines(data)
+	if len(lines) == 0 {
+		t.Fatal("streaming fixture is empty")
+	}
+	known := map[EventType]bool{
+		EventText: true, EventThought: true, EventEnd: true, EventError: true,
+		EventAssistant: true, EventDelta: true, EventTool: true, EventToolResult: true,
+		EventPermissionRequest: true, EventResult: true,
+	}
+	for i, line := range lines {
+		ev, err := parseEventLine(line)
+		if err != nil {
+			t.Fatalf("line %d decode failed: %v", i+1, err)
+		}
+		if !known[ev.Type] {
+			t.Fatalf("line %d has uncataloged event type %q", i+1, ev.Type)
+		}
+		if ev.Type == EventThought && ev.Content() == "" {
+			t.Fatalf("line %d thought event missing content", i+1)
+		}
+	}
+}
+
+func splitNonEmptyLines(data []byte) [][]byte {
+	raw := bytes.Split(data, []byte("\n"))
+	lines := make([][]byte, 0, len(raw))
+	for _, line := range raw {
+		line = bytes.TrimSpace(line)
+		if len(line) > 0 {
+			lines = append(lines, line)
+		}
+	}
+	return lines
 }
 
 func TestStreamPrompt_AgainstMock(t *testing.T) {

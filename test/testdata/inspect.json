@@ -1,0 +1,2222 @@
+{
+  "grokVersion": "0.2.81",
+  "channel": "stable",
+  "cwd": "/Users/lancerogers/Dev/AI/CC_GO_PLANNING/projects/grok-go-sdk",
+  "projectRoot": "/Users/lancerogers/Dev/AI/CC_GO_PLANNING/projects/grok-go-sdk/",
+  "projectTrusted": true,
+  "bridgeTrusted": true,
+  "projectInstructions": [
+    {
+      "path": "/Users/lancerogers/.claude/Claude.md",
+      "scope": "project",
+      "fileType": "agents_md",
+      "sizeBytes": 8859,
+      "approxTokens": 2214,
+      "vendor": "claude"
+    }
+  ],
+  "permissions": {
+    "sources": [
+      "/Users/lancerogers/.claude/settings.local.json (settings)"
+    ],
+    "loaded": 325,
+    "skipped": [],
+    "mcpServerAllowlist": [],
+    "marketplaceAllowlist": [],
+    "managedSettingsPath": "/Library/Application Support/ClaudeCode/managed-settings.json",
+    "managedSettingsExists": false,
+    "managedSettingsActive": false
+  },
+  "loginPolicy": {
+    "disableApiKeyAuth": null,
+    "forceLoginTeamUuid": null,
+    "apiKeyAuthDisabled": false
+  },
+  "hooks": [
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/protect-mcp/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "protect-mcp",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/protect-mcp"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/review-agent-governance/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "review-agent-governance",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/review-agent-governance"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/learning-output-style/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "learning-output-style",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/learning-output-style"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/security-guidance/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "security-guidance",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/security-guidance"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/explanatory-output-style/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "explanatory-output-style",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/explanatory-output-style"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/ralph-loop/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "ralph-loop",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/ralph-loop"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/hookify/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "hookify",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/hookify"
+      },
+      "matcher": null
+    },
+    {
+      "event": "(plugin)",
+      "hookType": "file",
+      "target": "/Users/lancerogers/.claude/plugins/cache/claude-plugins-official/ralph-wiggum/unknown/hooks/hooks.json",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "ralph-wiggum",
+        "path": "/Users/lancerogers/.claude/plugins/cache/claude-plugins-official/ralph-wiggum/unknown"
+      },
+      "matcher": null
+    }
+  ],
+  "skills": [
+    {
+      "name": "code-review",
+      "description": "Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a deep code quality audit or an especially harsh maintainability review.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/code-review/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "xlsx",
+      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \"the xlsx in my downloads\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/xlsx/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "create-skill",
+      "description": "Interactively create a new Grok skill (SKILL.md + optional scripts/references). Use when the user wants to create a skill, scaffold a skill, or runs /create-skill.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/create-skill/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "pptx",
+      "description": "Use this skill any time a .pptx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates, layouts, speaker notes, or comments. Trigger whenever the user mentions \"deck,\" \"slides,\" \"presentation,\" or references a .pptx filename, regardless of what they plan to do with the content afterward. If a .pptx file needs to be opened, created, or touched, use this skill.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/pptx/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "check-work",
+      "description": "Check your work with a verification subagent that reviews diffs, runs builds and tests, and evaluates correctness. Read this file for instructions. Use when asked to \"check work\", \"verify changes\", \"self-verify\", \"/check-work\", \"/check\", \"/verify\", or \"/self-verify\".",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/check-work/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "docx",
+      "description": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/docx/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "imagine",
+      "description": "How to use the image_gen and image_edit tool calls in Grok Build: when to build a visual with code instead of generating it, prompt-craft, reference-first handling of real people, factual grounding, and asset-consistency. Load this whenever generating or editing an image is on the table, i.e. when an image_gen or image_edit call is being considered or about to be made. Tool-usage-driven, not triggered by a user merely mentioning images.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/imagine/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "help",
+      "description": "Grok documentation and configuration help. Use when users ask about setup, configuration, MCP servers, authentication, skills, slash commands, keyboard shortcuts, or any Grok feature. Also use proactively when you detect a user is having trouble with setup or onboarding.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/skills/help/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "context7-mcp",
+      "description": "This skill should be used when the user asks about libraries, frameworks, API references, or needs code examples. Activates for setup questions, code generation involving libraries, or mentions of specific frameworks like React, Vue, Next.js, Prisma, Supabase, etc.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.claude/skills/context7-mcp/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "design",
+      "description": "Run the full design-doc-writer and design-doc-reviewer loop until consensus. Produces a polished design document with a PR plan.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/bundled/skills/design/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "execute-plan",
+      "description": "Execute a PR Plan DAG from a design document. Parses the plan, topologically sorts it, implements PRs in parallel using worktree-isolated subagents, runs mandatory orchestrator-level review, and assembles either a Graphite PR stack or a plain-git branch stack depending on tool availability.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/bundled/skills/execute-plan/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "pr-babysit",
+      "description": "Monitor PRs, fix CI failures, address review comments, resolve merge conflicts, and restack stacks. Supports independent PRs, Graphite stacks, and GitHub stacked PRs (gh-stack).",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/bundled/skills/pr-babysit/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "review",
+      "description": "Run a reviewer subagent against uncommitted local changes, a named branch, or a GitHub PR. Local and branch modes write a review file plus a summary to disk. PR mode posts the findings as a PENDING GitHub review for the user to inspect and submit through the UI.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/bundled/skills/review/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "implement",
+      "description": "Run the full implement-review-fix loop using implementer and reviewer personas. Supports effort-based multi-reviewer scaling (1-5 reviewers) with automatic specialization selection. Includes memory-based feedback loop that learns from past review patterns. Loops until all reviewers find 0 issues of any severity.",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/bundled/skills/implement/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "remove-wall-of-text",
+      "description": "Rewrite your previous response as a tight, skimmable version without losing any substance. Use when the user asks you to condense, shorten, or de-verbose your last answer -- e.g. \"that was a wall of text\", \"your reply is too long\", \"tl;dr your last message\", \"make your answer more concise\", \"unwallify\" -- or runs \"/remove-wall-of-text\".",
+      "source": {
+        "type": "user",
+        "path": "/Users/lancerogers/.grok/bundled/skills/remove-wall-of-text/SKILL.md"
+      },
+      "userInvocable": true
+    },
+    {
+      "name": "multi-agent-optimize",
+      "description": "Multi-Agent Optimization Toolkit",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "agent-orchestration",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/agent-orchestration/commands/multi-agent-optimize.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "improve-agent",
+      "description": "Agent Performance Optimization Workflow",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "agent-orchestration",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/agent-orchestration/commands/improve-agent.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "doc-generate",
+      "description": "Automated Documentation Generation",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "code-documentation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-documentation/commands/doc-generate.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "code-explain",
+      "description": "Code Explanation and Analysis",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "code-documentation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-documentation/commands/code-explain.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "context-save",
+      "description": "Context Save Tool: Intelligent Context Management Specialist",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "context-management",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/context-management/commands/context-save.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "context-restore",
+      "description": "Context Restoration: Advanced Semantic Memory Rehydration",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "context-management",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/context-management/commands/context-restore.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "architecture-decision-records",
+      "description": "Write and maintain Architecture Decision Records (ADRs) following best practices for technical decision documentation. Use when documenting significant technical decisions, reviewing past architectural choices, or establishing decision processes.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/skills/architecture-decision-records/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "changelog-automation",
+      "description": "Automate changelog generation from commits, PRs, and releases following Keep a Changelog format. Use when setting up release workflows, generating release notes, or standardizing commit conventions.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/skills/changelog-automation/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "openapi-spec-generation",
+      "description": "Generate and maintain OpenAPI 3.1 specifications from code, design-first specs, and validation patterns. Use when creating API documentation, generating SDKs, or ensuring API contract compliance.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/skills/openapi-spec-generation/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "doc-generate",
+      "description": "Automated Documentation Generation",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/commands/doc-generate.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "frontend-design",
+      "description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "frontend-design",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design/skills/frontend-design/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "command-development",
+      "description": "This skill should be used when the user asks to \"create a slash command\", \"add a command\", \"write a custom command\", \"define command arguments\", \"use command frontmatter\", \"organize commands\", \"create command with file references\", \"interactive command\", \"use AskUserQuestion in command\", or needs guidance on slash command structure, YAML frontmatter fields, dynamic arguments, bash execution in commands, user interaction patterns, or command development best practices for Claude Code.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/command-development/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "skill-development",
+      "description": "This skill should be used when the user wants to \"create a skill\", \"add a skill to plugin\", \"write a new skill\", \"improve skill description\", \"organize skill content\", or needs guidance on skill structure, progressive disclosure, or skill development best practices for Claude Code plugins.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/skill-development/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "plugin-settings",
+      "description": "This skill should be used when the user asks about \"plugin settings\", \"store plugin configuration\", \"user-configurable plugin\", \".local.md files\", \"plugin state files\", \"read YAML frontmatter\", \"per-project plugin settings\", or wants to make plugin behavior configurable. Documents the .claude/plugin-name.local.md pattern for storing plugin-specific configuration with YAML frontmatter and markdown content.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/plugin-settings/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "plugin-structure",
+      "description": "This skill should be used when the user asks to \"create a plugin\", \"scaffold a plugin\", \"understand plugin structure\", \"organize plugin components\", \"set up plugin.json\", \"use ${CLAUDE_PLUGIN_ROOT}\", \"add commands/agents/skills/hooks\", \"configure auto-discovery\", or needs guidance on plugin directory layout, manifest configuration, component organization, file naming conventions, or Claude Code plugin architecture best practices.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/plugin-structure/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "hook-development",
+      "description": "This skill should be used when the user asks to \"create a hook\", \"add a PreToolUse/PostToolUse/Stop hook\", \"validate tool use\", \"implement prompt-based hooks\", \"use ${CLAUDE_PLUGIN_ROOT}\", \"set up event-driven automation\", \"block dangerous commands\", or mentions hook events (PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, UserPromptSubmit, PreCompact, Notification). Provides comprehensive guidance for creating and implementing Claude Code plugin hooks with focus on advanced prompt-based hooks API.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/hook-development/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "mcp-integration",
+      "description": "This skill should be used when the user asks to \"add MCP server\", \"integrate MCP\", \"configure MCP in plugin\", \"use .mcp.json\", \"set up Model Context Protocol\", \"connect external service\", mentions \"${CLAUDE_PLUGIN_ROOT} with MCP\", or discusses MCP server types (SSE, stdio, HTTP, WebSocket). Provides comprehensive guidance for integrating Model Context Protocol servers into Claude Code plugins for external tool and service integration.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/mcp-integration/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "agent-development",
+      "description": "This skill should be used when the user asks to \"create an agent\", \"add an agent\", \"write a subagent\", \"agent frontmatter\", \"when to use description\", \"agent examples\", \"agent tools\", \"agent colors\", \"autonomous agent\", or needs guidance on agent structure, system prompts, triggering conditions, or agent development best practices for Claude Code plugins.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills/agent-development/SKILL.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    },
+    {
+      "name": "create-plugin",
+      "description": "Guided end-to-end plugin creation workflow with component design, implementation, and validation",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/commands/create-plugin.md"
+      },
+      "userInvocable": true,
+      "vendor": "claude"
+    }
+  ],
+  "agents": [
+    {
+      "name": "general-purpose",
+      "description": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you.",
+      "source": {
+        "type": "builtin"
+      }
+    },
+    {
+      "name": "explore",
+      "description": "Fast agent specialized for exploring codebases. Use this when you need to quickly find files by patterns (eg. \"src/components/**/*.tsx\"), search code for keywords (eg. \"API endpoints\"), or answer questions about the codebase (eg. \"how do API endpoints work?\"). When calling this agent, specify the desired thoroughness level: \"quick\" for basic searches, \"medium\" for moderate exploration, or \"very thorough\" for comprehensive analysis across multiple locations and naming conventions.",
+      "source": {
+        "type": "builtin"
+      }
+    },
+    {
+      "name": "plan",
+      "description": "Software architect agent for designing implementation plans. Use this when you need to plan the implementation strategy for a task. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs.",
+      "source": {
+        "type": "builtin"
+      }
+    },
+    {
+      "name": "agent-orchestration:agent-orchestration-context-manager",
+      "description": "Elite AI context engineering specialist mastering dynamic context management, vector databases, knowledge graphs, and intelligent memory systems. Orchestrates context across multi-agent workflows, enterprise AI systems, and long-running projects with 2024/2025 best practices. Use PROACTIVELY for complex AI orchestration.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "agent-orchestration",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/agent-orchestration/agents/context-manager.md"
+      }
+    },
+    {
+      "name": "code-documentation:code-documentation-code-reviewer",
+      "description": "Elite code review expert specializing in modern AI-powered code analysis, security vulnerabilities, performance optimization, and production reliability. Masters static analysis tools, security scanning, and configuration review with 2024/2025 best practices. Use PROACTIVELY for code quality assurance.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "code-documentation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-documentation/agents/code-reviewer.md"
+      }
+    },
+    {
+      "name": "code-documentation:code-documentation-docs-architect",
+      "description": "Creates comprehensive technical documentation from existing codebases. Analyzes architecture, design patterns, and implementation details to produce long-form technical manuals and ebooks. Use PROACTIVELY for system documentation, architecture guides, or technical deep-dives.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "code-documentation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-documentation/agents/docs-architect.md"
+      }
+    },
+    {
+      "name": "code-documentation:code-documentation-tutorial-engineer",
+      "description": "Creates step-by-step tutorials and educational content from code. Transforms complex concepts into progressive learning experiences with hands-on examples. Use PROACTIVELY for onboarding guides, feature tutorials, or concept explanations.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "code-documentation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-documentation/agents/tutorial-engineer.md"
+      }
+    },
+    {
+      "name": "code-simplifier:code-simplifier",
+      "description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "code-simplifier",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/code-simplifier/agents/code-simplifier.md"
+      }
+    },
+    {
+      "name": "context-management:context-management-context-manager",
+      "description": "Elite AI context engineering specialist mastering dynamic context management, vector databases, knowledge graphs, and intelligent memory systems. Orchestrates context across multi-agent workflows, enterprise AI systems, and long-running projects with 2024/2025 best practices. Use PROACTIVELY for complex AI orchestration.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "context-management",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/context-management/agents/context-manager.md"
+      }
+    },
+    {
+      "name": "documentation-generation:reference-builder",
+      "description": "Creates exhaustive technical references and API documentation. Generates comprehensive parameter listings, configuration guides, and searchable reference materials. Use PROACTIVELY for API docs, configuration references, or complete technical specifications.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/agents/reference-builder.md"
+      }
+    },
+    {
+      "name": "documentation-generation:documentation-generation-docs-architect",
+      "description": "Creates comprehensive technical documentation from existing codebases. Analyzes architecture, design patterns, and implementation details to produce long-form technical manuals and ebooks. Use PROACTIVELY for system documentation, architecture guides, or technical deep-dives.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/agents/docs-architect.md"
+      }
+    },
+    {
+      "name": "documentation-generation:documentation-generation-api-documenter",
+      "description": "Master API documentation with OpenAPI 3.1, AI-powered tools, and modern developer experience practices. Create interactive docs, generate SDKs, and build comprehensive developer portals. Use PROACTIVELY for API documentation or developer portal creation.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/agents/api-documenter.md"
+      }
+    },
+    {
+      "name": "documentation-generation:documentation-generation-tutorial-engineer",
+      "description": "Creates step-by-step tutorials and educational content from code. Transforms complex concepts into progressive learning experiences with hands-on examples. Use PROACTIVELY for onboarding guides, feature tutorials, or concept explanations.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/agents/tutorial-engineer.md"
+      }
+    },
+    {
+      "name": "documentation-generation:mermaid-expert",
+      "description": "Create Mermaid diagrams for flowcharts, sequences, ERDs, and architectures. Masters syntax for all diagram types and styling. Use PROACTIVELY for visual documentation, system diagrams, or process flows.",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "documentation-generation",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation/agents/mermaid-expert.md"
+      }
+    },
+    {
+      "name": "plugin-dev:skill-reviewer",
+      "description": "Use this agent when the user has created or modified a skill and needs quality review, asks to \"review my skill\", \"check skill quality\", \"improve skill description\", or wants to ensure skill follows best practices. Trigger proactively after skill creation. Examples:\n\n<example>\nContext: User just created a new skill\nuser: \"I've created a PDF processing skill\"\nassistant: \"Great! Let me review the skill quality.\"\n<commentary>\nSkill created, proactively trigger skill-reviewer to ensure it follows best practices.\n</commentary>\nassistant: \"I'll use the skill-reviewer agent to review the skill.\"\n</example>\n\n<example>\nContext: User requests skill review\nuser: \"Review my skill and tell me how to improve it\"\nassistant: \"I'll use the skill-reviewer agent to analyze the skill quality.\"\n<commentary>\nExplicit skill review request triggers the agent.\n</commentary>\n</example>\n\n<example>\nContext: User modified skill description\nuser: \"I updated the skill description, does it look good?\"\nassistant: \"I'll use the skill-reviewer agent to review the changes.\"\n<commentary>\nSkill description modified, review for triggering effectiveness.\n</commentary>\n</example>\n",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/agents/skill-reviewer.md"
+      }
+    },
+    {
+      "name": "plugin-dev:plugin-validator",
+      "description": "Use this agent when the user asks to \"validate my plugin\", \"check plugin structure\", \"verify plugin is correct\", \"validate plugin.json\", \"check plugin files\", or mentions plugin validation. Also trigger proactively after user creates or modifies plugin components. Examples:\n\n<example>\nContext: User finished creating a new plugin\nuser: \"I've created my first plugin with commands and hooks\"\nassistant: \"Great! Let me validate the plugin structure.\"\n<commentary>\nPlugin created, proactively validate to catch issues early.\n</commentary>\nassistant: \"I'll use the plugin-validator agent to check the plugin.\"\n</example>\n\n<example>\nContext: User explicitly requests validation\nuser: \"Validate my plugin before I publish it\"\nassistant: \"I'll use the plugin-validator agent to perform comprehensive validation.\"\n<commentary>\nExplicit validation request triggers the agent.\n</commentary>\n</example>\n\n<example>\nContext: User modified plugin.json\nuser: \"I've updated the plugin manifest\"\nassistant: \"Let me validate the changes.\"\n<commentary>\nManifest modified, validate to ensure correctness.\n</commentary>\nassistant: \"I'll use the plugin-validator agent to check the manifest.\"\n</example>\n",
+      "source": {
+        "type": "plugin",
+        "plugin_name": "plugin-dev",
+        "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/agents/plugin-validator.md"
+      }
+    }
+  ],
+  "plugins": [
+    {
+      "name": "payment-processing",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/payment-processing",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "ui-design",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/ui-design",
+      "enabled": true,
+      "provides": {
+        "skills": 9,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "machine-learning-ops",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/machine-learning-ops",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "backend-development",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/backend-development",
+      "enabled": true,
+      "provides": {
+        "skills": 9,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "incident-response",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/incident-response",
+      "enabled": true,
+      "provides": {
+        "skills": 3,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "developer-essentials",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/developer-essentials",
+      "enabled": true,
+      "provides": {
+        "skills": 11,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "comprehensive-review",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/comprehensive-review",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "database-design",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/database-design",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "api-testing-observability",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/api-testing-observability",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "documentation-standards",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-standards",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "observability-monitoring",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/observability-monitoring",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "protect-mcp",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/protect-mcp",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "plugin-eval",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/plugin-eval",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "seo-analysis-monitoring",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/seo-analysis-monitoring",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "hr-legal-compliance",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/hr-legal-compliance",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "arm-cortex-microcontrollers",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/arm-cortex-microcontrollers",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "meigen-ai-design",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/meigen-ai-design",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "api-scaffolding",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/api-scaffolding",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "multi-platform-apps",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/multi-platform-apps",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "python-development",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/python-development",
+      "enabled": true,
+      "provides": {
+        "skills": 16,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "frontend-mobile-development",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/frontend-mobile-development",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "customer-sales-automation",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/customer-sales-automation",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "runapi-mcp",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/runapi-mcp",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "kubernetes-operations",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/kubernetes-operations",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "startup-business-analyst",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/startup-business-analyst",
+      "enabled": true,
+      "provides": {
+        "skills": 5,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "codebase-cleanup",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/codebase-cleanup",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "brand-landingpage",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/brand-landingpage",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "frontend-mobile-security",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/frontend-mobile-security",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "web-scripting",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/web-scripting",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "code-documentation",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-documentation",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "cloud-infrastructure",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/cloud-infrastructure",
+      "enabled": true,
+      "provides": {
+        "skills": 8,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "error-debugging",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/error-debugging",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "deployment-validation",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/deployment-validation",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "quantitative-trading",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/quantitative-trading",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "full-stack-orchestration",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/full-stack-orchestration",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "accessibility-compliance",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/accessibility-compliance",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "application-performance",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/application-performance",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "functional-programming",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/functional-programming",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "documentation-generation",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/documentation-generation",
+      "enabled": true,
+      "provides": {
+        "skills": 3,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "team-collaboration",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/team-collaboration",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "jvm-languages",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/jvm-languages",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "social-publishing",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/social-publishing",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "content-marketing",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/content-marketing",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "julia-development",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/julia-development",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "distributed-debugging",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/distributed-debugging",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "agent-teams",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/agent-teams",
+      "enabled": true,
+      "provides": {
+        "skills": 6,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "reverse-engineering",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/reverse-engineering",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "security-scanning",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/security-scanning",
+      "enabled": true,
+      "provides": {
+        "skills": 5,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "data-engineering",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/data-engineering",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "database-cloud-optimization",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/database-cloud-optimization",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "agent-orchestration",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/agent-orchestration",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "dotnet-contribution",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/dotnet-contribution",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "llm-application-dev",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/llm-application-dev",
+      "enabled": true,
+      "provides": {
+        "skills": 8,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "framework-migration",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/framework-migration",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "shell-scripting",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/shell-scripting",
+      "enabled": true,
+      "provides": {
+        "skills": 3,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "blockchain-web3",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/blockchain-web3",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "context-management",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/context-management",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "systems-programming",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/systems-programming",
+      "enabled": true,
+      "provides": {
+        "skills": 3,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "business-analytics",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/business-analytics",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "file-conversion",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/file-conversion",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "seo-technical-optimization",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/seo-technical-optimization",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "seo-content-creation",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/seo-content-creation",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "unit-testing",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/unit-testing",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "dependency-management",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/dependency-management",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "database-migrations",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/database-migrations",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "performance-testing-review",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/performance-testing-review",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "deployment-strategies",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/deployment-strategies",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "signed-audit-trails",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/signed-audit-trails",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "javascript-typescript",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/javascript-typescript",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "code-refactoring",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/code-refactoring",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "ship-mate",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/ship-mate",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "before-you-build",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/before-you-build",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "git-pr-workflows",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/git-pr-workflows",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "game-development",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/game-development",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "cicd-automation",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/cicd-automation",
+      "enabled": true,
+      "provides": {
+        "skills": 4,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "c4-architecture",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/c4-architecture",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "conductor",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/conductor",
+      "enabled": true,
+      "provides": {
+        "skills": 3,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "tdd-workflows",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/tdd-workflows",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "data-validation-suite",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/data-validation-suite",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "error-diagnostics",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/error-diagnostics",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "block-no-verify",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/block-no-verify",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "security-compliance",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/security-compliance",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "backend-api-security",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/backend-api-security",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "debugging-toolkit",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/debugging-toolkit",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "review-agent-governance",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-code-workflows/plugins/review-agent-governance",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "claude-code-setup",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "mcp-server-dev",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/mcp-server-dev",
+      "enabled": true,
+      "provides": {
+        "skills": 3,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "feature-dev",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "claude-md-management",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-md-management",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "playground",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "example-plugin",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "learning-output-style",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/learning-output-style",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "cwc-makers",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/cwc-makers",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "code-review",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/code-review",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "plugin-dev",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev",
+      "enabled": true,
+      "provides": {
+        "skills": 7,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "mcp-tunnels",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/mcp-tunnels",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "math-olympiad",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/math-olympiad",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "session-report",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/session-report",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "pr-review-toolkit",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/pr-review-toolkit",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "skill-creator",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "security-guidance",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/security-guidance",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "frontend-design",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "code-modernization",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/code-modernization",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "agent-sdk-dev",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/agent-sdk-dev",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "explanatory-output-style",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/explanatory-output-style",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "commit-commands",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/commit-commands",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "ralph-loop",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/ralph-loop",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "hookify",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/hookify",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 1,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "code-simplifier",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/code-simplifier",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 1,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "project-artifact",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/plugins/project-artifact",
+      "enabled": true,
+      "provides": {
+        "skills": 1,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 0
+      }
+    },
+    {
+      "name": "terraform",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/terraform",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "discord",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/discord",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "gitlab",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/gitlab",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "context7",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/context7",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "linear",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/linear",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "greptile",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/greptile",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "serena",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/serena",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "playwright",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/playwright",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "fakechat",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/fakechat",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "firebase",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/firebase",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "github",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/github",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "telegram",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/telegram",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "laravel-boost",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/laravel-boost",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "imessage",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/imessage",
+      "enabled": true,
+      "provides": {
+        "skills": 2,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "asana",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/asana",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": false,
+        "mcpServers": 1
+      }
+    },
+    {
+      "name": "ralph-wiggum",
+      "scope": "user",
+      "path": "/Users/lancerogers/.claude/plugins/cache/claude-plugins-official/ralph-wiggum/unknown",
+      "enabled": true,
+      "provides": {
+        "skills": 0,
+        "agents": 0,
+        "hooks": true,
+        "mcpServers": 0
+      }
+    }
+  ],
+  "marketplaces": [],
+  "mcpServers": [
+    {
+      "name": "pinchtab",
+      "transport": "stdio",
+      "target": "pinchtab",
+      "source": {
+        "type": "claudeJson",
+        "path": "/Users/lancerogers/.claude.json"
+      },
+      "vendor": "claude"
+    },
+    {
+      "name": "context7",
+      "transport": "stdio",
+      "target": "npx",
+      "source": {
+        "type": "claudeJson",
+        "path": "/Users/lancerogers/.claude.json"
+      },
+      "vendor": "claude"
+    }
+  ],
+  "lspServers": [],
+  "configSources": {
+    "layers": [
+      {
+        "role": "user",
+        "path": "/Users/lancerogers/.grok/config.toml"
+      }
+    ]
+  },
+  "externalCompat": {
+    "cells": [
+      {
+        "vendor": "cursor",
+        "surface": "skills",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "cursor",
+        "surface": "rules",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "cursor",
+        "surface": "agents",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "cursor",
+        "surface": "mcps",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "cursor",
+        "surface": "hooks",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "claude",
+        "surface": "skills",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "claude",
+        "surface": "rules",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "claude",
+        "surface": "agents",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "claude",
+        "surface": "mcps",
+        "enabled": true,
+        "source": "default"
+      },
+      {
+        "vendor": "claude",
+        "surface": "hooks",
+        "enabled": true,
+        "source": "default"
+      }
+    ]
+  }
+}

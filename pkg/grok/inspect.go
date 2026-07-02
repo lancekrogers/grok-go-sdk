@@ -17,26 +17,26 @@ type InspectInstruction struct {
 
 // InspectHook is one configured hook in InspectReport.Hooks.
 type InspectHook struct {
-	Event    string `json:"event"`
-	HookType string `json:"hookType"`
-	Target   string `json:"target"`
-	Source   string `json:"source"`
-	Matcher  string `json:"matcher"`
+	Event    string          `json:"event"`
+	HookType string          `json:"hookType"`
+	Target   string          `json:"target"`
+	Source   json.RawMessage `json:"source"`
+	Matcher  string          `json:"matcher"`
 }
 
 // InspectSkill is one skill in InspectReport.Skills.
 type InspectSkill struct {
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	Source        string `json:"source"`
-	UserInvocable bool   `json:"userInvocable"`
+	Name          string          `json:"name"`
+	Description   string          `json:"description"`
+	Source        json.RawMessage `json:"source"`
+	UserInvocable bool            `json:"userInvocable"`
 }
 
 // InspectAgent is one agent in InspectReport.Agents.
 type InspectAgent struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Source      string `json:"source"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Source      json.RawMessage `json:"source"`
 }
 
 // InspectPlugin is one plugin in InspectReport.Plugins.
@@ -50,14 +50,14 @@ type InspectPlugin struct {
 
 // InspectMCPServer is one MCP server in InspectReport.MCPServers.
 type InspectMCPServer struct {
-	Name      string `json:"name"`
-	Transport string `json:"transport"`
-	Target    string `json:"target"`
-	Source    string `json:"source"`
-	Vendor    string `json:"vendor"`
+	Name      string          `json:"name"`
+	Transport string          `json:"transport"`
+	Target    string          `json:"target"`
+	Source    json.RawMessage `json:"source"`
+	Vendor    string          `json:"vendor"`
 }
 
-// InspectReport is the decoded `grok inspect --json` payload (grok 0.2.77, camelCase).
+// InspectReport is the decoded `grok inspect --json` camelCase payload.
 // Free-form objects are kept as json.RawMessage; any unknown top-level key lands
 // in Extra for forward compatibility.
 type InspectReport struct {

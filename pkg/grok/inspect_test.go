@@ -2,6 +2,8 @@ package grok
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -57,6 +59,27 @@ func TestParseInspect_CamelCase(t *testing.T) {
 	}
 	if len(ir.Extra) != 0 {
 		t.Fatalf("Extra should be empty for a complete payload, got %#v", ir.Extra)
+	}
+}
+
+func TestParseInspect_CapturedFixture(t *testing.T) {
+	path := filepath.Join("..", "..", "test", "testdata", "inspect.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Skipf("fixture not yet captured: %v", err)
+	}
+	ir, err := parseInspect(data)
+	if err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if ir.GrokVersion == "" {
+		t.Fatalf("missing grokVersion: %#v", ir)
+	}
+	if ir.CWD == "" {
+		t.Fatalf("missing cwd: %#v", ir)
+	}
+	if len(ir.Permissions) == 0 || len(ir.ConfigSources) == 0 {
+		t.Fatalf("raw objects should be populated: %#v", ir)
 	}
 }
 

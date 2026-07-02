@@ -20,6 +20,12 @@ func TestSessionsList_AgainstFixture(t *testing.T) {
 	if got[0].ID == "" {
 		t.Fatal("first session missing id")
 	}
+	if got[0].ID == "SESSION ID" {
+		t.Fatalf("parsed table header as session: %#v", got[0])
+	}
+	if got[0].UpdatedAt == "" {
+		t.Fatalf("first session missing updated date: %#v", got[0])
+	}
 }
 
 func TestSessionsDelete_EmptyID(t *testing.T) {

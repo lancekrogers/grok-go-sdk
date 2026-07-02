@@ -30,4 +30,22 @@ func TestGrokResult_DecodeSayHello(t *testing.T) {
 	if r.Text == "" {
 		t.Error("text missing")
 	}
+
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		t.Fatalf("raw decode failed: %v", err)
+	}
+	known := map[string]bool{
+		"text": true, "stopReason": true, "sessionId": true, "requestId": true, "thought": true,
+		"costUsd": true, "durationMs": true, "durationApiMs": true, "numTurns": true,
+		"isError": true, "subtype": true,
+	}
+	for key := range raw {
+		if !known[key] {
+			t.Fatalf("GrokResult fixture contains unmapped field %q", key)
+		}
+	}
+	if _, ok := raw["text"]; !ok {
+		t.Fatal("raw text field missing")
+	}
 }

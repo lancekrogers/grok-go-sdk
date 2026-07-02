@@ -54,7 +54,7 @@ func parseSessions(data []byte) []SessionSummary {
 	sc := bufio.NewScanner(bytes.NewReader(data))
 	for sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
+		if line == "" || line == "(no label)" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "SESSION ID") {
 			continue
 		}
 		s := parseSessionLine(line)
@@ -66,6 +66,13 @@ func parseSessions(data []byte) []SessionSummary {
 }
 
 func parseSessionLine(line string) SessionSummary {
+	if strings.Contains(line, "\t") {
+		return parseTabSessionLine(line)
+	}
+	return parseTableSessionLine(line)
+}
+
+func parseTabSessionLine(line string) SessionSummary {
 	parts := strings.Split(line, "\t")
 	s := SessionSummary{}
 	if len(parts) > 0 {
@@ -79,6 +86,21 @@ func parseSessionLine(line string) SessionSummary {
 	}
 	if len(parts) > 3 {
 		s.Summary = parts[3]
+	}
+	return s
+}
+
+func parseTableSessionLine(line string) SessionSummary {
+	parts := strings.Fields(line)
+	if len(parts) < 4 || !strings.HasPrefix(parts[0], "019") {
+		return SessionSummary{}
+	}
+	s := SessionSummary{
+		ID:        parts[0],
+		UpdatedAt: parts[2],
+	}
+	if len(parts) > 4 {
+		s.Summary = strings.Join(parts[4:], " ")
 	}
 	return s
 }
