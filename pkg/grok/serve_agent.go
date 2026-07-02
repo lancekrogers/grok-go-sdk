@@ -39,7 +39,7 @@ type ServeAgent struct {
 	addr     string
 	stopOnce sync.Once
 	stopErr  error
-	waitDone chan struct{}
+	waitDone chan error
 }
 
 var listeningRe = regexp.MustCompile(`listening on ([0-9A-Fa-f:.\[\]]+:[0-9]+)`)
@@ -75,10 +75,9 @@ func (c *GrokClient) StartServeAgent(ctx context.Context, cfg *ServeAgentConfig)
 		return nil, err
 	}
 
-	sa := &ServeAgent{cmd: cmd, waitDone: make(chan struct{})}
+	sa := &ServeAgent{cmd: cmd, waitDone: make(chan error, 1)}
 	go func() {
-		_ = cmd.Wait()
-		close(sa.waitDone)
+		sa.waitDone <- cmd.Wait()
 	}()
 
 	deadline := time.Now().Add(2 * time.Second)
@@ -99,7 +98,7 @@ func (s *ServeAgent) Addr() string { return s.addr }
 
 func (s *ServeAgent) Stop() error {
 	s.stopOnce.Do(func() {
-		stopGracefully(s.cmd, s.waitDone)
+		s.stopErr = stopGracefully(s.cmd, s.waitDone)
 	})
 	return s.stopErr
 }

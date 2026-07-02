@@ -23,7 +23,8 @@ type LeaderAgentConfig struct {
 type LeaderAgent struct {
 	cmd      *exec.Cmd
 	stopOnce sync.Once
-	waitDone chan struct{}
+	stopErr  error
+	waitDone chan error
 }
 
 func leaderAgentArgs(cfg *LeaderAgentConfig) []string {
@@ -58,10 +59,9 @@ func (c *GrokClient) StartLeaderAgent(ctx context.Context, cfg *LeaderAgentConfi
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
-	la := &LeaderAgent{cmd: cmd, waitDone: make(chan struct{})}
+	la := &LeaderAgent{cmd: cmd, waitDone: make(chan error, 1)}
 	go func() {
-		_ = cmd.Wait()
-		close(la.waitDone)
+		la.waitDone <- cmd.Wait()
 	}()
 	return la, nil
 }
@@ -69,7 +69,7 @@ func (c *GrokClient) StartLeaderAgent(ctx context.Context, cfg *LeaderAgentConfi
 // Stop signals the leader process to terminate, escalating to kill after a grace period.
 func (l *LeaderAgent) Stop() error {
 	l.stopOnce.Do(func() {
-		stopGracefully(l.cmd, l.waitDone)
+		l.stopErr = stopGracefully(l.cmd, l.waitDone)
 	})
-	return nil
+	return l.stopErr
 }
