@@ -48,6 +48,25 @@ func TestWorktreeGC_Argv(t *testing.T) {
 	}
 }
 
+func TestFormatWorktreeMaxAge(t *testing.T) {
+	cases := []struct {
+		name string
+		in   time.Duration
+		want string
+	}{
+		{"hours over a day", 72 * time.Hour, "72h"},
+		{"hours", 25 * time.Hour, "25h"},
+		{"minutes", 90 * time.Minute, "90m"},
+		{"seconds", 90 * time.Second, "90s"},
+		{"round subsecond up", 500 * time.Millisecond, "1s"},
+	}
+	for _, tc := range cases {
+		if got := formatWorktreeMaxAge(tc.in); got != tc.want {
+			t.Fatalf("%s got %q want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
 func TestWorktreeDBPath_AgainstMock(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
