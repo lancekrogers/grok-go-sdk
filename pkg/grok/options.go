@@ -132,10 +132,10 @@ func PreprocessOptions(opts *RunOptions) error {
 	if opts.ExperimentalMemory && opts.NoMemory {
 		return fmt.Errorf("validation: ExperimentalMemory and NoMemory are mutually exclusive")
 	}
-	if opts.RestoreCode && opts.ResumeID == "" {
-		return fmt.Errorf("validation: RestoreCode requires ResumeID")
-	}
 	resuming := opts.ResumeID != "" || opts.Continue
+	if opts.RestoreCode && !resuming {
+		return fmt.Errorf("validation: RestoreCode requires ResumeID or Continue")
+	}
 	if opts.ForkSession && !resuming {
 		return fmt.Errorf("validation: ForkSession only valid with ResumeID or Continue")
 	}

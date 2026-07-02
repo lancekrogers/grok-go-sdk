@@ -5,8 +5,6 @@ import (
 	"io"
 	"os/exec"
 	"sync"
-	"syscall"
-	"time"
 )
 
 // LeaderAgentConfig configures StartLeaderAgent (grok agent leader) — the shared
@@ -54,7 +52,7 @@ func (c *GrokClient) StartLeaderAgent(ctx context.Context, cfg *LeaderAgentConfi
 	if cfg == nil {
 		cfg = &LeaderAgentConfig{}
 	}
-	cmd := execCommand(ctx, c.BinPath, leaderAgentArgs(cfg)...)
+	cmd := c.command(ctx, leaderAgentArgs(cfg)...)
 	cmd.Env = c.envBase(cfg.Env)
 	cmd.Stderr = cfg.Stderr
 	if err := cmd.Start(); err != nil {
@@ -71,17 +69,7 @@ func (c *GrokClient) StartLeaderAgent(ctx context.Context, cfg *LeaderAgentConfi
 // Stop signals the leader process to terminate, escalating to kill after a grace period.
 func (l *LeaderAgent) Stop() error {
 	l.stopOnce.Do(func() {
-		if l.cmd.Process != nil {
-			_ = l.cmd.Process.Signal(syscall.SIGTERM)
-		}
-		select {
-		case <-l.waitDone:
-		case <-time.After(5 * time.Second):
-			if l.cmd.Process != nil {
-				_ = l.cmd.Process.Kill()
-			}
-			<-l.waitDone
-		}
+		stopGracefully(l.cmd, l.waitDone)
 	})
 	return nil
 }

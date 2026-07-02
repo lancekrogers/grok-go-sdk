@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"regexp"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -69,7 +68,7 @@ func (c *GrokClient) StartServeAgent(ctx context.Context, cfg *ServeAgentConfig)
 	if cfg == nil {
 		cfg = &ServeAgentConfig{}
 	}
-	cmd := execCommand(ctx, c.BinPath, serveArgs(cfg)...)
+	cmd := c.command(ctx, serveArgs(cfg)...)
 	stderr := &syncBuffer{}
 	cmd.Stderr = stderr
 	if err := cmd.Start(); err != nil {
@@ -100,17 +99,7 @@ func (s *ServeAgent) Addr() string { return s.addr }
 
 func (s *ServeAgent) Stop() error {
 	s.stopOnce.Do(func() {
-		if s.cmd.Process != nil {
-			_ = s.cmd.Process.Signal(syscall.SIGTERM)
-		}
-		select {
-		case <-s.waitDone:
-		case <-time.After(5 * time.Second):
-			if s.cmd.Process != nil {
-				_ = s.cmd.Process.Kill()
-			}
-			<-s.waitDone
-		}
+		stopGracefully(s.cmd, s.waitDone)
 	})
 	return s.stopErr
 }

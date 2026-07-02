@@ -136,7 +136,11 @@ func TestPreprocessOptions_ForkRequiresResume(t *testing.T) {
 func TestPreprocessOptions_RestoreCodeRequiresResume(t *testing.T) {
 	err := PreprocessOptions(&RunOptions{Prompt: "x", RestoreCode: true})
 	if err == nil {
-		t.Fatal("expected error (RestoreCode requires ResumeID)")
+		t.Fatal("expected error (RestoreCode requires ResumeID or Continue)")
+	}
+	err = PreprocessOptions(&RunOptions{Prompt: "x", Continue: true, RestoreCode: true})
+	if err != nil {
+		t.Fatalf("Continue + RestoreCode should be valid: %v", err)
 	}
 }
 

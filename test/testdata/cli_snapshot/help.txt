@@ -225,6 +225,90 @@ Options:
       --leader-socket <PATH>
           Use a custom leader socket path instead of the default `~/.grok/leader.sock`
 
+## grok agent stdio --help
+
+Run the agent over stdio
+
+Usage: grok agent stdio [OPTIONS]
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok agent headless --help
+
+Run the agent headlessly over the Grok WebSocket relay
+
+Usage: grok agent headless [OPTIONS]
+
+Options:
+      --grok-ws-origin <GROK_WS_ORIGIN>
+
+      --grok-ws-url <GROK_WS_URL>
+
+      --debug
+          Enable debug logging
+      --debug-file <FILE>
+          Write debug logs to FILE
+  -h, --help
+          Print help
+      --leader-socket <PATH>
+          Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok agent serve --help
+
+Run the agent as a WebSocket server
+
+Usage: grok agent serve [OPTIONS]
+
+Options:
+      --bind <BIND>
+          Address for the server to listen on [default: 127.0.0.1:2419]
+      --secret <SECRET>
+          Secret token for client authentication (auto-generated if not provided) [env: GROK_AGENT_SECRET=]
+      --remote <REMOTE>
+          Remote agent URL for proxy mode
+      --grok-ws-origin <GROK_WS_ORIGIN>
+
+      --grok-ws-url <GROK_WS_URL>
+
+      --debug
+          Enable debug logging
+      --debug-file <FILE>
+          Write debug logs to FILE
+  -h, --help
+          Print help
+      --leader-socket <PATH>
+          Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok agent leader --help
+
+Run as the shared leader process for other clients
+
+Usage: grok agent leader [OPTIONS]
+
+Options:
+      --no-exit-on-disconnect
+          Keep the leader running after the last client disconnects
+      --relay-on-demand
+          Defer the grok.com relay WebSocket until the first headless IPC client registers. Without this flag the leader connects the relay eagerly at startup — required for bare leaders (devbox/systemd) that receive remote prompts *through* the relay. Passed by leaders auto-spawned from interactive clients (TUI/IDE), which only need the relay if a headless client appears
+      --no-auto-update
+          Disable periodic auto-update checks for the leader
+      --grok-ws-origin <GROK_WS_ORIGIN>
+
+      --grok-ws-url <GROK_WS_URL>
+
+      --debug
+          Enable debug logging
+      --debug-file <FILE>
+          Write debug logs to FILE
+  -h, --help
+          Print help
+      --leader-socket <PATH>
+          Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
 ## grok leader --help
 
 Manage running leader processes
@@ -239,6 +323,107 @@ Commands:
   help     Print this message or the help of the given subcommand(s)
 
 Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader list --help
+
+List running leader processes
+
+Usage: grok leader list [OPTIONS]
+
+Options:
+      --json                  Emit machine-readable JSON output
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader info --help
+
+Show details for a leader process
+
+Usage: grok leader info [OPTIONS]
+
+Options:
+      --pid <PID>             Leader process ID from `grok leader list`
+      --json                  Emit machine-readable JSON output
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader kill --help
+
+Stop all running leader processes
+
+Usage: grok leader kill [OPTIONS]
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader profile --help
+
+Manage CPU profiling for a leader process
+
+Usage: grok leader profile [OPTIONS] <COMMAND>
+
+Commands:
+  status  Show profiling status
+  start   Start CPU profiling
+  stop    Stop CPU profiling
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader profile status --help
+
+Show profiling status
+
+Usage: grok leader profile status [OPTIONS]
+
+Options:
+      --pid <PID>             Leader process ID from `grok leader list`
+      --json
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader profile start --help
+
+Start CPU profiling
+
+Usage: grok leader profile start [OPTIONS]
+
+Options:
+      --pid <PID>                    Leader process ID from `grok leader list`
+      --output <OUTPUT>              Output path for the profile
+      --frequency-hz <FREQUENCY_HZ>  Sampling frequency in Hz
+      --json
+      --debug                        Enable debug logging
+      --debug-file <FILE>            Write debug logs to FILE
+  -h, --help                         Print help
+      --leader-socket <PATH>         Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok leader profile stop --help
+
+Stop CPU profiling
+
+Usage: grok leader profile stop [OPTIONS]
+
+Options:
+      --pid <PID>             Leader process ID from `grok leader list`
+      --json
       --debug                 Enable debug logging
       --debug-file <FILE>     Write debug logs to FILE
   -h, --help                  Print help
@@ -263,6 +448,133 @@ Options:
   -h, --help                  Print help
       --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
 
+## grok mcp list --help
+
+List configured MCP servers
+
+Usage: grok mcp list [OPTIONS]
+
+Options:
+      --json                  Emit machine-readable JSON output
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok mcp add --help
+
+Add or update an MCP server
+
+Usage: grok mcp add [OPTIONS] <NAME> [COMMAND_OR_URL] [ARGS]...
+
+Arguments:
+  <NAME>
+          Server name
+
+  [COMMAND_OR_URL]
+          Command to launch (stdio) or URL to connect to (http, sse)
+
+  [ARGS]...
+          Arguments passed to the server command. Place them after `--` so flags such as `-y` are passed to the server instead of grok
+
+Options:
+  -t, --transport <TRANSPORT>
+          Transport type. Defaults to stdio
+
+          Possible values:
+          - stdio: Launch a local process and communicate over stdin/stdout
+          - http:  Connect to a remote server over streamable HTTP
+          - sse:   Connect to a remote server over Server-Sent Events
+
+  -s, --scope <SCOPE>
+          Config to write to: user (~/.grok/config.toml) or project (./.grok/config.toml)
+
+          Possible values:
+          - user:    `~/.grok/config.toml`, available in all your projects
+          - project: `./.grok/config.toml`, shared with everyone working in this directory
+
+          [default: user]
+
+  -e, --env <KEY=value>
+          Environment variable for the server process (repeatable)
+
+  -H, --header <NAME: VALUE>
+          HTTP header for remote servers (repeatable)
+
+      --debug
+          Enable debug logging
+
+      --debug-file <FILE>
+          Write debug logs to FILE
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+      --leader-socket <PATH>
+          Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+Examples:
+  # Add a stdio server (everything after -- is the server command)
+  grok mcp add xcode -- xcrun mcpbridge
+
+  # Add a stdio server with environment variables
+  grok mcp add postgres -e DATABASE_URL=postgres://localhost/mydb -- npx -y @modelcontextprotocol/server-postgres
+
+  # Add a remote HTTP server
+  grok mcp add --transport http sentry https://mcp.sentry.dev/mcp
+
+  # Add a remote server with an authentication header
+  grok mcp add --transport http api https://mcp.example.com/mcp --header "Authorization: Bearer YOUR_TOKEN"
+
+  # Add to the project config (./.grok/config.toml) instead of ~/.grok/config.toml
+  grok mcp add --scope project github -- npx -y @modelcontextprotocol/server-github
+
+## grok mcp remove --help
+
+Remove an MCP server
+
+Usage: grok mcp remove [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>
+          Server name to remove
+
+Options:
+  -s, --scope <SCOPE>
+          Config to remove from. When omitted, all scopes are searched
+
+          Possible values:
+          - user:    `~/.grok/config.toml`, available in all your projects
+          - project: `./.grok/config.toml`, shared with everyone working in this directory
+
+      --debug
+          Enable debug logging
+
+      --debug-file <FILE>
+          Write debug logs to FILE
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+      --leader-socket <PATH>
+          Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok mcp doctor --help
+
+Diagnose MCP server configuration and connectivity
+
+Usage: grok mcp doctor [OPTIONS] [NAME]
+
+Arguments:
+  [NAME]  Server name to check
+
+Options:
+      --json                  Emit machine-readable JSON output
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
 ## grok memory --help
 
 Manage cross-session memory
@@ -274,6 +586,22 @@ Commands:
   help   Print this message or the help of the given subcommand(s)
 
 Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok memory clear --help
+
+Clear memory files (workspace by default)
+
+Usage: grok memory clear [OPTIONS]
+
+Options:
+      --workspace             Clear workspace-scoped memory (MEMORY.md, sessions/, index.sqlite)
+      --global                Clear global MEMORY.md
+      --all                   Clear both workspace and global memory
+  -y, --yes                   Skip confirmation prompt
       --debug                 Enable debug logging
       --debug-file <FILE>     Write debug logs to FILE
   -h, --help                  Print help
@@ -299,6 +627,123 @@ Options:
   -h, --help                  Print help
       --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
 
+## grok worktree list --help
+
+List tracked worktrees
+
+Usage: grok worktree list [OPTIONS]
+
+Options:
+      --repo <REPO>
+      --type <TYPE>
+      --json
+      --all
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree show --help
+
+Show details for a specific worktree
+
+Usage: grok worktree show [OPTIONS] <ID_OR_PATH>
+
+Arguments:
+  <ID_OR_PATH>
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree rm --help
+
+Remove worktrees
+
+Usage: grok worktree rm [OPTIONS] <IDS>...
+
+Arguments:
+  <IDS>...
+
+Options:
+  -f, --force
+      --dry-run
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree gc --help
+
+Garbage-collect orphaned/stale worktrees
+
+Usage: grok worktree gc [OPTIONS]
+
+Options:
+      --dry-run
+      --max-age <MAX_AGE>
+  -f, --force
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree db --help
+
+Database maintenance
+
+Usage: grok worktree db [OPTIONS] <COMMAND>
+
+Commands:
+  rebuild  Rebuild DB from filesystem scan
+  stats    Show DB statistics
+  path     Print DB file path
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree db rebuild --help
+
+Rebuild DB from filesystem scan
+
+Usage: grok worktree db rebuild [OPTIONS]
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree db stats --help
+
+Show DB statistics
+
+Usage: grok worktree db stats [OPTIONS]
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok worktree db path --help
+
+Print DB file path
+
+Usage: grok worktree db path [OPTIONS]
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
 ## grok sessions --help
 
 List, search, or restore sessions
@@ -310,6 +755,50 @@ Commands:
   search  Search sessions by keyword
   delete  Permanently delete a session from history
   help    Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok sessions list --help
+
+List recent sessions (same as search with no query)
+
+Usage: grok sessions list [OPTIONS]
+
+Options:
+  -n, --limit <LIMIT>         Maximum number of sessions to show [default: 20]
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok sessions search --help
+
+Search sessions by keyword
+
+Usage: grok sessions search [OPTIONS] <QUERY>
+
+Arguments:
+  <QUERY>  Search query (searches summaries and first prompts)
+
+Options:
+  -n, --limit <LIMIT>         Maximum number of sessions to show [default: 20]
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok sessions delete --help
+
+Permanently delete a session from history
+
+Usage: grok sessions delete [OPTIONS] <ID>
+
+Arguments:
+  <ID>  Session id to delete
 
 Options:
       --debug                 Enable debug logging
@@ -335,6 +824,223 @@ Commands:
   tag          Create a release git tag from the plugin's manifest version
   marketplace  Manage marketplace sources
   help         Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin list --help
+
+List installed plugins
+
+Usage: grok plugin list [OPTIONS]
+
+Options:
+      --json                  Emit machine-readable JSON output
+      --available             Include available plugins from marketplace sources. Requires --json
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin install --help
+
+Install a plugin from a git URL or local path
+
+Usage: grok plugin install [OPTIONS] <SOURCE>
+
+Arguments:
+  <SOURCE>  Git URL, GitHub shorthand (user/repo), or local path. Supports @ref suffix (e.g. user/repo@v1.0) and #subdir
+
+Options:
+      --trust                 Trust the plugin immediately (skip confirmation prompt)
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin uninstall --help
+
+Uninstall an installed plugin by name
+
+Usage: grok plugin uninstall [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>  Plugin name (as shown by `grok plugin list`)
+
+Options:
+      --confirm               Skip confirmation for multi-plugin repos
+      --keep-data             Preserve the plugin's persistent data directory
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin update --help
+
+Update installed plugin(s)
+
+Usage: grok plugin update [OPTIONS] [NAME]
+
+Arguments:
+  [NAME]  Plugin name to update. Omit to update all
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin enable --help
+
+Enable a disabled plugin
+
+Usage: grok plugin enable [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>  Plugin name to enable
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin disable --help
+
+Disable a plugin without uninstalling it
+
+Usage: grok plugin disable [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>  Plugin name to disable
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin details --help
+
+Show a plugin's component inventory
+
+Usage: grok plugin details [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>  Plugin name
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin validate --help
+
+Validate a plugin manifest
+
+Usage: grok plugin validate [OPTIONS] [PATH]
+
+Arguments:
+  [PATH]  Path to plugin directory (default: current directory) [default: .]
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin tag --help
+
+Create a release git tag from the plugin's manifest version
+
+Usage: grok plugin tag [OPTIONS] [PATH]
+
+Arguments:
+  [PATH]  Path to plugin directory (default: current directory) [default: .]
+
+Options:
+      --push                  Push the tag to the remote after creating it
+  -f, --force                 Create the tag even if the working tree is dirty or tag exists
+      --dry-run               Print what would be tagged without creating the tag
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin marketplace --help
+
+Manage marketplace sources
+
+Usage: grok plugin marketplace [OPTIONS] <COMMAND>
+
+Commands:
+  list    List configured marketplace sources and their plugins
+  add     Add a marketplace source (git URL or GitHub shorthand)
+  remove  Remove a marketplace source and uninstall its plugins
+  update  Refresh marketplace source(s) and sync git caches
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin marketplace list --help
+
+List configured marketplace sources and their plugins
+
+Usage: grok plugin marketplace list [OPTIONS]
+
+Options:
+      --json                  Emit machine-readable JSON output
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin marketplace add --help
+
+Add a marketplace source (git URL or GitHub shorthand)
+
+Usage: grok plugin marketplace add [OPTIONS] <URL>
+
+Arguments:
+  <URL>  Git URL or GitHub shorthand (e.g. user/repo)
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin marketplace remove --help
+
+Remove a marketplace source and uninstall its plugins
+
+Usage: grok plugin marketplace remove [OPTIONS] <URL>
+
+Arguments:
+  <URL>  Git URL or local path of the source to remove
+
+Options:
+      --debug                 Enable debug logging
+      --debug-file <FILE>     Write debug logs to FILE
+  -h, --help                  Print help
+      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+
+## grok plugin marketplace update --help
+
+Refresh marketplace source(s) and sync git caches
+
+Usage: grok plugin marketplace update [OPTIONS] [NAME]
+
+Arguments:
+  [NAME]  Source URL to refresh. Omit to refresh all
 
 Options:
       --debug                 Enable debug logging

@@ -72,7 +72,7 @@ func (c *GrokClient) RunHeadlessAgent(ctx context.Context, cfg *HeadlessAgentCon
 	if cfg == nil {
 		cfg = &HeadlessAgentConfig{}
 	}
-	cmd := execCommand(ctx, c.BinPath, headlessArgs(cfg)...)
+	cmd := c.command(ctx, headlessArgs(cfg)...)
 	cmd.Env = c.envBase(cfg.Env)
 	cmd.Stdin = cfg.Stdin
 	cmd.Stdout = cfg.Stdout

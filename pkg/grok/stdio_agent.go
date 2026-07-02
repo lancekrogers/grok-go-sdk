@@ -46,7 +46,7 @@ func (c *GrokClient) StartStdioAgent(ctx context.Context, cfg *StdioConfig) (*St
 	if cfg == nil {
 		cfg = &StdioConfig{}
 	}
-	cmd := execCommand(ctx, c.BinPath, "agent", "stdio")
+	cmd := c.command(ctx, "agent", "stdio")
 	cmd.Env = c.envBase(cfg.Env)
 
 	stdin, err := cmd.StdinPipe()

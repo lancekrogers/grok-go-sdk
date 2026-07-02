@@ -4,6 +4,7 @@ import (
 	"context"
 	"os/exec"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -52,13 +53,77 @@ func TestLeaderProfileStart_Options(t *testing.T) {
 }
 
 func TestLeaderSocket_Threaded(t *testing.T) {
-	got := captureArgs(t)
-	c := NewClient("grok")
-	c.LeaderSocket = "/tmp/x.sock"
-	_, _ = c.MCPList(context.Background())
-	want := []string{"mcp", "list", "--leader-socket", "/tmp/x.sock"}
-	if !reflect.DeepEqual(*got, want) {
-		t.Fatalf("got %v want %v", *got, want)
+	cases := []struct {
+		name string
+		call func(*GrokClient)
+		want []string
+	}{
+		{
+			name: "subcommand",
+			call: func(c *GrokClient) { _, _ = c.MCPList(context.Background()) },
+			want: []string{"mcp", "list", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "run prompt",
+			call: func(c *GrokClient) { _, _ = c.RunPrompt("hi", &RunOptions{}) },
+			want: []string{"-p", "hi", "--output-format", "plain", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "stdin",
+			call: func(c *GrokClient) { _, _ = c.RunFromStdin(strings.NewReader("hi"), "", &RunOptions{}) },
+			want: []string{"--output-format", "plain", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "login",
+			call: func(c *GrokClient) { _ = c.Login(context.Background(), LoginOAuth) },
+			want: []string{"login", "--oauth", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "headless",
+			call: func(c *GrokClient) { _ = c.RunHeadlessAgent(context.Background(), &HeadlessAgentConfig{}) },
+			want: []string{"agent", "headless", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "stdio",
+			call: func(c *GrokClient) {
+				s, _ := c.StartStdioAgent(context.Background(), nil)
+				if s != nil {
+					_ = s.Close()
+				}
+			},
+			want: []string{"agent", "stdio", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "serve",
+			call: func(c *GrokClient) {
+				sa, _ := c.StartServeAgent(context.Background(), &ServeAgentConfig{Bind: "127.0.0.1:0"})
+				if sa != nil {
+					_ = sa.Stop()
+				}
+			},
+			want: []string{"agent", "serve", "--bind", "127.0.0.1:0", "--leader-socket", "/tmp/x.sock"},
+		},
+		{
+			name: "leader agent",
+			call: func(c *GrokClient) {
+				la, _ := c.StartLeaderAgent(context.Background(), nil)
+				if la != nil {
+					_ = la.Stop()
+				}
+			},
+			want: []string{"agent", "leader", "--leader-socket", "/tmp/x.sock"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := captureArgs(t)
+			c := NewClient("grok")
+			c.LeaderSocket = "/tmp/x.sock"
+			tc.call(c)
+			if !reflect.DeepEqual(*got, tc.want) {
+				t.Fatalf("got %v want %v", *got, tc.want)
+			}
+		})
 	}
 }
 

@@ -188,7 +188,6 @@ opts := &grok.RunOptions{
 | Field | Purpose |
 |-------|---------|
 | `Format` | `JSONOutput`, `StreamingJSONOutput`, `PlainOutput` |
-| `InputFormat` | `TextInput`, `StreamJSONInput` |
 | `Model` | model identifier (e.g. `grok-build`) |
 | `WorkingDirectory` | overrides the spawned `grok` process cwd |
 | `Timeout` | per-call timeout (uses `context.WithTimeout`) |

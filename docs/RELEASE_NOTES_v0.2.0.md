@@ -29,7 +29,7 @@ CLI alignment release for the current Grok Build CLI surface.
 
 - Refreshed CLI reference docs and live output fixtures.
 - Added fixture-backed decode/parser coverage for result, stream, inspect, models, MCP, sessions, leader, and version output.
-- Added `just cli-drift` and `just cli-drift-update`, plus a non-blocking CI drift check.
+- Added `just cli-drift` and `just cli-drift-update`, plus a CI drift check that installs the Grok CLI before comparing snapshots.
 
 ## Verification
 

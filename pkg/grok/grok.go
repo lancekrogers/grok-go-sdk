@@ -18,8 +18,8 @@ type GrokClient struct {
 	DefaultOptions *RunOptions
 	Env            []string
 	WorkingDir     string
-	// LeaderSocket, when set, is passed as the global --leader-socket <path> on
-	// every subcommand so the client talks to a specific leader process.
+	// LeaderSocket, when set, is passed as the global --leader-socket <path> so
+	// spawned grok commands talk to a specific leader process.
 	LeaderSocket string
 }
 
@@ -32,6 +32,10 @@ func (c *GrokClient) withLeaderSocket(args []string) []string {
 	out = append(out, args...)
 	out = append(out, "--leader-socket", c.LeaderSocket)
 	return out
+}
+
+func (c *GrokClient) command(ctx context.Context, args ...string) *exec.Cmd {
+	return execCommand(ctx, c.BinPath, c.withLeaderSocket(args)...)
 }
 
 func NewClient(binPath string) *GrokClient {
@@ -77,7 +81,7 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 			return nil, err
 		}
 	}
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.workDir(prepared)
 	cmd.Env = c.envFor(prepared)
 	var stdout, stderr bytes.Buffer
@@ -111,7 +115,7 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 }
 
 func (c *GrokClient) runSubcommandTolerant(ctx context.Context, args []string) ([]byte, error) {
-	cmd := execCommand(ctx, c.BinPath, c.withLeaderSocket(args)...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.WorkingDir
 	cmd.Env = c.envBase(nil)
 	var stdout, stderr bytes.Buffer
@@ -130,7 +134,7 @@ func (c *GrokClient) runSubcommandTolerant(ctx context.Context, args []string) (
 }
 
 func (c *GrokClient) runSubcommand(ctx context.Context, args []string) ([]byte, error) {
-	cmd := execCommand(ctx, c.BinPath, c.withLeaderSocket(args)...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.WorkingDir
 	cmd.Env = c.envBase(nil)
 	var stdout, stderr bytes.Buffer

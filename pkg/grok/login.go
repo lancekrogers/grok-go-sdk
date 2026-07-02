@@ -22,7 +22,7 @@ func (c *GrokClient) Login(ctx context.Context, mode LoginMode) error {
 	case LoginDevice:
 		args = append(args, "--device-auth")
 	}
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := c.command(ctx, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
