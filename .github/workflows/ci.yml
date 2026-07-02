@@ -56,14 +56,6 @@ jobs:
         with:
           tool: just
 
-      - name: Install grok CLI
-        run: |
-          curl -fsSL https://x.ai/cli/install.sh | bash
-          echo "$HOME/.grok/bin" >> "$GITHUB_PATH"
-
-      - name: Check grok CLI drift
-        run: just cli-drift
-
       - name: Race tests
         run: go test -race ./pkg/grok/...
 
@@ -77,3 +69,11 @@ jobs:
 
       - name: Build examples
         run: go build ./examples/...
+
+      - name: Install grok CLI
+        run: |
+          curl -fsSL https://x.ai/cli/install.sh | bash
+          echo "$HOME/.grok/bin" >> "$GITHUB_PATH"
+
+      - name: Check grok CLI drift
+        run: just cli-drift
