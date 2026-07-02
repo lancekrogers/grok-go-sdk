@@ -252,7 +252,7 @@ just demo basic     # run an example
 - [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md) - every flag the SDK emits
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - subprocess/IPC architecture
 - [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - dev environment + PR norms
-- [docs/RELEASE_NOTES_v0.1.0.md](docs/RELEASE_NOTES_v0.1.0.md) - changelog
+- [docs/RELEASE_NOTES_v0.2.0.md](docs/RELEASE_NOTES_v0.2.0.md) - changelog
 
 ## Contributing
 
