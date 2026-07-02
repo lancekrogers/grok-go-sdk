@@ -51,6 +51,15 @@ jobs:
       - name: Unit tests
         run: go test ./pkg/grok/...
 
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Check grok CLI drift
+        continue-on-error: true
+        run: just cli-drift
+
       - name: Race tests
         run: go test -race ./pkg/grok/...
 
