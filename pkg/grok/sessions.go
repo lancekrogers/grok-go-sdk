@@ -25,7 +25,11 @@ func (c *GrokClient) SessionsList(ctx context.Context, limit int) ([]SessionSumm
 	if err != nil {
 		return nil, err
 	}
-	return parseSessions(out), nil
+	sessions, dropped := parseSessionsReport(out)
+	if dropped > 0 {
+		return sessions, validationErrorf("sessions parse dropped %d unrecognized rows", dropped)
+	}
+	return sessions, nil
 }
 
 func (c *GrokClient) SessionsSearch(ctx context.Context, query string, limit int) ([]SessionSummary, error) {
@@ -37,7 +41,11 @@ func (c *GrokClient) SessionsSearch(ctx context.Context, query string, limit int
 	if err != nil {
 		return nil, err
 	}
-	return parseSessions(out), nil
+	sessions, dropped := parseSessionsReport(out)
+	if dropped > 0 {
+		return sessions, validationErrorf("sessions parse dropped %d unrecognized rows", dropped)
+	}
+	return sessions, nil
 }
 
 // SessionsDelete permanently deletes a session from history (sessions delete <id>).
@@ -50,19 +58,34 @@ func (c *GrokClient) SessionsDelete(ctx context.Context, id string) error {
 }
 
 func parseSessions(data []byte) []SessionSummary {
+	sessions, _ := parseSessionsReport(data)
+	return sessions
+}
+
+func parseSessionsReport(data []byte) ([]SessionSummary, int) {
 	var out []SessionSummary
+	dropped := 0
 	sc := bufio.NewScanner(bytes.NewReader(data))
 	for sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
-		if line == "" || line == "(no label)" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "SESSION ID") {
+		if isSessionListMetadata(line) {
 			continue
 		}
 		s := parseSessionLine(line)
 		if s.ID != "" {
 			out = append(out, s)
+			continue
 		}
+		dropped++
 	}
-	return out
+	return out, dropped
+}
+
+func isSessionListMetadata(line string) bool {
+	return line == "" ||
+		line == "(no label)" ||
+		strings.HasPrefix(line, "#") ||
+		strings.HasPrefix(line, "SESSION ID")
 }
 
 func parseSessionLine(line string) SessionSummary {
@@ -74,25 +97,25 @@ func parseSessionLine(line string) SessionSummary {
 
 func parseTabSessionLine(line string) SessionSummary {
 	parts := strings.Split(line, "\t")
-	s := SessionSummary{}
-	if len(parts) > 0 {
-		s.ID = parts[0]
+	if len(parts) < 4 || strings.TrimSpace(parts[0]) == "" || !isDateLike(strings.TrimSpace(parts[1])) {
+		return SessionSummary{}
 	}
+	s := SessionSummary{ID: strings.TrimSpace(parts[0])}
 	if len(parts) > 1 {
-		s.UpdatedAt = parts[1]
+		s.UpdatedAt = strings.TrimSpace(parts[1])
 	}
 	if len(parts) > 2 {
-		s.CWD = parts[2]
+		s.CWD = strings.TrimSpace(parts[2])
 	}
 	if len(parts) > 3 {
-		s.Summary = parts[3]
+		s.Summary = strings.TrimSpace(parts[3])
 	}
 	return s
 }
 
 func parseTableSessionLine(line string) SessionSummary {
 	parts := strings.Fields(line)
-	if len(parts) < 4 || !isUUIDLike(parts[0]) {
+	if len(parts) < 4 || parts[0] == "" || !isDateLike(parts[1]) || !isDateLike(parts[2]) {
 		return SessionSummary{}
 	}
 	s := SessionSummary{
@@ -105,18 +128,18 @@ func parseTableSessionLine(line string) SessionSummary {
 	return s
 }
 
-func isUUIDLike(s string) bool {
-	if len(s) != 36 {
+func isDateLike(s string) bool {
+	if len(s) < len("2006-01-02") {
 		return false
 	}
-	for i, r := range s {
+	for i, r := range s[:len("2006-01-02")] {
 		switch i {
-		case 8, 13, 18, 23:
+		case 4, 7:
 			if r != '-' {
 				return false
 			}
 		default:
-			if !((r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')) {
+			if r < '0' || r > '9' {
 				return false
 			}
 		}

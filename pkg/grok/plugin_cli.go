@@ -2,7 +2,6 @@ package grok
 
 import (
 	"context"
-	"errors"
 )
 
 // This file wraps the `grok plugin` CLI subcommand tree (installable plugins and
@@ -36,7 +35,7 @@ func (c *GrokClient) PluginList(ctx context.Context) (string, error) {
 // PluginInstall installs a plugin from a git URL, GitHub shorthand, or local path.
 func (c *GrokClient) PluginInstall(ctx context.Context, source string, opts PluginInstallOptions) error {
 	if source == "" {
-		return errors.New("plugin install: source required")
+		return validationError("plugin install: source required")
 	}
 	_, err := c.runSubcommand(ctx, pluginInstallArgs(source, opts))
 	return err
@@ -53,7 +52,7 @@ func pluginInstallArgs(source string, opts PluginInstallOptions) []string {
 // PluginUninstall uninstalls a plugin by name.
 func (c *GrokClient) PluginUninstall(ctx context.Context, name string, opts PluginUninstallOptions) error {
 	if name == "" {
-		return errors.New("plugin uninstall: name required")
+		return validationError("plugin uninstall: name required")
 	}
 	_, err := c.runSubcommand(ctx, pluginUninstallArgs(name, opts))
 	return err
@@ -83,7 +82,7 @@ func (c *GrokClient) PluginUpdate(ctx context.Context, name string) error {
 // PluginEnable enables a disabled plugin.
 func (c *GrokClient) PluginEnable(ctx context.Context, name string) error {
 	if name == "" {
-		return errors.New("plugin enable: name required")
+		return validationError("plugin enable: name required")
 	}
 	_, err := c.runSubcommand(ctx, []string{"plugin", "enable", name})
 	return err
@@ -92,7 +91,7 @@ func (c *GrokClient) PluginEnable(ctx context.Context, name string) error {
 // PluginDisable disables a plugin without uninstalling it.
 func (c *GrokClient) PluginDisable(ctx context.Context, name string) error {
 	if name == "" {
-		return errors.New("plugin disable: name required")
+		return validationError("plugin disable: name required")
 	}
 	_, err := c.runSubcommand(ctx, []string{"plugin", "disable", name})
 	return err
@@ -101,7 +100,7 @@ func (c *GrokClient) PluginDisable(ctx context.Context, name string) error {
 // PluginDetails shows a plugin's component inventory.
 func (c *GrokClient) PluginDetails(ctx context.Context, name string) (string, error) {
 	if name == "" {
-		return "", errors.New("plugin details: name required")
+		return "", validationError("plugin details: name required")
 	}
 	out, err := c.runSubcommand(ctx, []string{"plugin", "details", name})
 	return string(out), err
@@ -151,7 +150,7 @@ func (c *GrokClient) MarketplaceList(ctx context.Context) (string, error) {
 // MarketplaceAdd adds a marketplace source (git URL or GitHub shorthand).
 func (c *GrokClient) MarketplaceAdd(ctx context.Context, url string) error {
 	if url == "" {
-		return errors.New("marketplace add: url required")
+		return validationError("marketplace add: url required")
 	}
 	_, err := c.runSubcommand(ctx, []string{"plugin", "marketplace", "add", url})
 	return err
@@ -160,7 +159,7 @@ func (c *GrokClient) MarketplaceAdd(ctx context.Context, url string) error {
 // MarketplaceRemove removes a marketplace source (and uninstalls its plugins).
 func (c *GrokClient) MarketplaceRemove(ctx context.Context, url string) error {
 	if url == "" {
-		return errors.New("marketplace remove: url required")
+		return validationError("marketplace remove: url required")
 	}
 	_, err := c.runSubcommand(ctx, []string{"plugin", "marketplace", "remove", url})
 	return err

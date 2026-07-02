@@ -26,6 +26,8 @@ func TestPluginEmptyGuards(t *testing.T) {
 	ctx := context.Background()
 	if err := c.PluginInstall(ctx, "", PluginInstallOptions{}); err == nil {
 		t.Error("install empty source should error")
+	} else {
+		requireValidationError(t, err)
 	}
 	if err := c.PluginUninstall(ctx, "", PluginUninstallOptions{}); err == nil {
 		t.Error("uninstall empty name should error")

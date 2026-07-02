@@ -1,7 +1,6 @@
 package dangerous
 
 import (
-	"errors"
 	"os"
 
 	"github.com/lancekrogers/grok-go-sdk/pkg/grok"
@@ -11,8 +10,8 @@ const enableEnv = "GROK_ENABLE_DANGEROUS"
 const enableValue = "i-accept-all-risks"
 
 var (
-	ErrNotEnabled = errors.New("dangerous: GROK_ENABLE_DANGEROUS must be set to \"i-accept-all-risks\"")
-	ErrProduction = errors.New("dangerous: refusing to run in production environment")
+	ErrNotEnabled = &grok.GrokError{Type: grok.ErrorValidation, Message: "dangerous: GROK_ENABLE_DANGEROUS must be set to \"i-accept-all-risks\""}
+	ErrProduction = &grok.GrokError{Type: grok.ErrorValidation, Message: "dangerous: refusing to run in production environment"}
 )
 
 type Client struct {

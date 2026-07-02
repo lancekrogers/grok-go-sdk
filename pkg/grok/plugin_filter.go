@@ -2,7 +2,6 @@ package grok
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 )
 
@@ -21,7 +20,7 @@ func (p *ToolFilterPlugin) OnBeforeRun(_ context.Context, ev BeforeRunEvent) err
 		for pattern, reason := range p.blocked {
 			matched, _ := filepath.Match(pattern, a)
 			if matched {
-				return fmt.Errorf("blocked tool/arg %q: %s", a, reason)
+				return validationErrorf("blocked tool/arg %q: %s", a, reason)
 			}
 		}
 	}
@@ -35,7 +34,7 @@ func (p *ToolFilterPlugin) OnAfterRun(_ context.Context, ev AfterRunEvent) error
 	for pattern, reason := range p.blocked {
 		matched, _ := filepath.Match(pattern, ev.Result.Subtype)
 		if matched {
-			return fmt.Errorf("blocked result subtype %q: %s", ev.Result.Subtype, reason)
+			return validationErrorf("blocked result subtype %q: %s", ev.Result.Subtype, reason)
 		}
 	}
 	return nil

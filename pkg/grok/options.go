@@ -1,7 +1,6 @@
 package grok
 
 import (
-	"fmt"
 	"os"
 	"time"
 )
@@ -118,38 +117,53 @@ type RunOptions struct {
 
 func PreprocessOptions(opts *RunOptions) error {
 	if opts == nil {
-		return fmt.Errorf("validation: RunOptions is nil")
+		return validationError("RunOptions is nil")
 	}
-
-	hasPrompt := opts.Prompt != "" || opts.PromptFile != "" || opts.PromptJSON != ""
-
-	if opts.BestOfN > 0 && !hasPrompt {
-		return fmt.Errorf("validation: BestOfN requires a prompt source")
+	if err := validatePromptOptions(opts); err != nil {
+		return err
 	}
-	if opts.Check && !hasPrompt {
-		return fmt.Errorf("validation: Check requires a prompt source")
+	if err := validateSessionOptions(opts); err != nil {
+		return err
 	}
-	if opts.ExperimentalMemory && opts.NoMemory {
-		return fmt.Errorf("validation: ExperimentalMemory and NoMemory are mutually exclusive")
-	}
-	resuming := opts.ResumeID != "" || opts.Continue
-	if opts.RestoreCode && !resuming {
-		return fmt.Errorf("validation: RestoreCode requires ResumeID or Continue")
-	}
-	if opts.ForkSession && !resuming {
-		return fmt.Errorf("validation: ForkSession only valid with ResumeID or Continue")
-	}
-	if opts.SessionID != "" && resuming && !opts.ForkSession {
-		return fmt.Errorf("validation: SessionID with ResumeID/Continue requires ForkSession")
-	}
-
 	if err := validateRules(opts.AllowRules, "AllowRules"); err != nil {
 		return err
 	}
 	if err := validateRules(opts.DenyRules, "DenyRules"); err != nil {
 		return err
 	}
+	applyRunOptionDefaults(opts)
+	return validateDangerousOptions(opts)
+}
 
+func validatePromptOptions(opts *RunOptions) error {
+	hasPrompt := opts.Prompt != "" || opts.PromptFile != "" || opts.PromptJSON != ""
+	if opts.BestOfN > 0 && !hasPrompt {
+		return validationError("BestOfN requires a prompt source")
+	}
+	if opts.Check && !hasPrompt {
+		return validationError("Check requires a prompt source")
+	}
+	if opts.ExperimentalMemory && opts.NoMemory {
+		return validationError("ExperimentalMemory and NoMemory are mutually exclusive")
+	}
+	return nil
+}
+
+func validateSessionOptions(opts *RunOptions) error {
+	resuming := opts.ResumeID != "" || opts.Continue
+	if opts.RestoreCode && !resuming {
+		return validationError("RestoreCode requires ResumeID or Continue")
+	}
+	if opts.ForkSession && !resuming {
+		return validationError("ForkSession only valid with ResumeID or Continue")
+	}
+	if opts.SessionID != "" && resuming && !opts.ForkSession {
+		return validationError("SessionID with ResumeID/Continue requires ForkSession")
+	}
+	return nil
+}
+
+func applyRunOptionDefaults(opts *RunOptions) {
 	if opts.JSONSchema != "" && (opts.Format == "" || opts.Format == PlainOutput) {
 		opts.Format = JSONOutput
 	}
@@ -159,19 +173,20 @@ func PreprocessOptions(opts *RunOptions) error {
 	if opts.SandboxProfile == "" {
 		opts.SandboxProfile = os.Getenv("GROK_SANDBOX")
 	}
+}
 
+func validateDangerousOptions(opts *RunOptions) error {
 	if !opts.AllowDangerousMode {
 		if opts.AlwaysApprove {
-			return fmt.Errorf("validation: AlwaysApprove requires AllowDangerousMode=true")
+			return validationError("AlwaysApprove requires AllowDangerousMode=true")
 		}
 		if opts.PermissionMode == PermissionBypassPermissions {
-			return fmt.Errorf("validation: PermissionBypassPermissions requires AllowDangerousMode=true")
+			return validationError("PermissionBypassPermissions requires AllowDangerousMode=true")
 		}
 		if SandboxIsPermissive(opts.SandboxProfile) {
-			return fmt.Errorf("validation: permissive SandboxProfile requires AllowDangerousMode=true")
+			return validationError("permissive SandboxProfile requires AllowDangerousMode=true")
 		}
 	}
-
 	return nil
 }
 

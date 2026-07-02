@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"errors"
 	"sort"
 	"strings"
 )
@@ -48,7 +47,7 @@ func (c *GrokClient) MCPList(ctx context.Context) ([]MCPServerConfig, error) {
 
 func (c *GrokClient) MCPAdd(ctx context.Context, cfg MCPServerConfig) error {
 	if cfg.Name == "" {
-		return errors.New("mcp add: name required")
+		return validationError("mcp add: name required")
 	}
 	_, err := c.runSubcommand(ctx, mcpAddArgs(cfg))
 	return err
@@ -86,7 +85,7 @@ func mcpAddArgs(cfg MCPServerConfig) []string {
 // binary's default); otherwise it targets user or project config.
 func (c *GrokClient) MCPRemove(ctx context.Context, name string, scope MCPScope) error {
 	if name == "" {
-		return errors.New("mcp remove: name required")
+		return validationError("mcp remove: name required")
 	}
 	args := []string{"mcp", "remove"}
 	if scope != "" {

@@ -79,6 +79,8 @@ func TestMCPRemove_EmptyName(t *testing.T) {
 	c := NewClient("/nonexistent")
 	if err := c.MCPRemove(context.Background(), "", ""); err == nil {
 		t.Fatal("expected error")
+	} else {
+		requireValidationError(t, err)
 	}
 }
 
@@ -86,5 +88,7 @@ func TestMCPAdd_EmptyName(t *testing.T) {
 	c := NewClient("/nonexistent")
 	if err := c.MCPAdd(context.Background(), MCPServerConfig{}); err == nil {
 		t.Fatal("expected error")
+	} else {
+		requireValidationError(t, err)
 	}
 }

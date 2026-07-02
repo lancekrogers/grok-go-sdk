@@ -1,9 +1,21 @@
 package grok
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
+
+func requireValidationError(t *testing.T, err error) {
+	t.Helper()
+	var ge *GrokError
+	if !errors.As(err, &ge) {
+		t.Fatalf("expected GrokError, got %T: %v", err, err)
+	}
+	if ge.Type != ErrorValidation {
+		t.Fatalf("expected validation error, got %s: %v", ge.Type, err)
+	}
+}
 
 func TestEnumConstants(t *testing.T) {
 	cases := []struct {
@@ -36,6 +48,7 @@ func TestPreprocessOptions_BestOfNWithoutPrompt(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
+	requireValidationError(t, err)
 	if !strings.Contains(err.Error(), "BestOfN") {
 		t.Errorf("expected BestOfN message, got %v", err)
 	}
@@ -46,6 +59,7 @@ func TestPreprocessOptions_CheckWithoutPrompt(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
+	requireValidationError(t, err)
 }
 
 func TestPreprocessOptions_BothMemoryFlags(t *testing.T) {

@@ -39,6 +39,24 @@ func TestParseSessions_FutureUUIDPrefix(t *testing.T) {
 	}
 }
 
+func TestParseSessionsReport_DroppedRows(t *testing.T) {
+	in := []byte("SESSION ID                            CREATED     UPDATED     STATUS      SUMMARY\nnot a session row\n")
+	got, dropped := parseSessionsReport(in)
+	if len(got) != 0 {
+		t.Fatalf("got sessions from malformed row: %#v", got)
+	}
+	if dropped != 1 {
+		t.Fatalf("dropped = %d, want 1", dropped)
+	}
+}
+
+func TestParseTabSessionLine_RequiresDateColumn(t *testing.T) {
+	got := parseSessionLine("not-a-uuid\tnot-a-date\t/tmp\tsummary")
+	if got.ID != "" {
+		t.Fatalf("parsed malformed tab row: %#v", got)
+	}
+}
+
 func TestSessionsDelete_EmptyID(t *testing.T) {
 	c := NewClient("/nonexistent")
 	if err := c.SessionsDelete(context.Background(), ""); err == nil {

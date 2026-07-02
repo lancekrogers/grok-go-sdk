@@ -1,7 +1,7 @@
 package grok
 
 import (
-	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -47,6 +47,26 @@ func (e *GrokError) IsRetryable() bool {
 
 func (e *GrokError) RetryDelay() time.Duration { return e.retryAfter }
 
+func validationError(message string) *GrokError {
+	return &GrokError{Type: ErrorValidation, Message: message}
+}
+
+func validationErrorWithOriginal(message string, original error) *GrokError {
+	return &GrokError{Type: ErrorValidation, Message: message, Original: original}
+}
+
+func validationErrorf(format string, args ...any) *GrokError {
+	return validationError(fmt.Sprintf(format, args...))
+}
+
+func transportError(message string, original error) *GrokError {
+	return &GrokError{Type: ErrorTransport, Message: message, Original: original}
+}
+
+func transportErrorf(original error, format string, args ...any) *GrokError {
+	return transportError(fmt.Sprintf(format, args...), original)
+}
+
 var retryAfterRe = regexp.MustCompile(`retry[- ]?after[^\d]*(\d+)`)
 
 func ParseError(stderr string, exitCode int) *GrokError {
@@ -79,4 +99,4 @@ func ParseError(stderr string, exitCode int) *GrokError {
 	return e
 }
 
-var ErrNotImplemented = errors.New("not implemented in this grok version")
+var ErrNotImplemented error = validationError("not implemented in this grok version")
