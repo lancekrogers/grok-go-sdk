@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+const (
+	SandboxOff       = "off"
+	SandboxNone      = "none"
+	SandboxWorkspace = "workspace"
+	SandboxReadOnly  = "read-only"
+	SandboxStrict    = "strict"
+)
+
 func ResolveSandboxProfile(field string) string {
 	if field != "" {
 		return field
@@ -14,7 +22,7 @@ func ResolveSandboxProfile(field string) string {
 
 func SandboxIsPermissive(profile string) bool {
 	switch strings.ToLower(profile) {
-	case "off", "none", "disabled":
+	case SandboxOff, SandboxNone:
 		return true
 	}
 	return false

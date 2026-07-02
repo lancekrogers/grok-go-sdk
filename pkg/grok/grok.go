@@ -18,6 +18,24 @@ type GrokClient struct {
 	DefaultOptions *RunOptions
 	Env            []string
 	WorkingDir     string
+	// LeaderSocket, when set, is passed as the global --leader-socket <path> so
+	// spawned grok commands talk to a specific leader process.
+	LeaderSocket string
+}
+
+// withLeaderSocket appends the global --leader-socket flag when configured.
+func (c *GrokClient) withLeaderSocket(args []string) []string {
+	if c.LeaderSocket == "" {
+		return args
+	}
+	out := make([]string, 0, len(args)+2)
+	out = append(out, args...)
+	out = append(out, "--leader-socket", c.LeaderSocket)
+	return out
+}
+
+func (c *GrokClient) command(ctx context.Context, args ...string) *exec.Cmd {
+	return execCommand(ctx, c.BinPath, c.withLeaderSocket(args)...)
 }
 
 func NewClient(binPath string) *GrokClient {
@@ -44,60 +62,93 @@ func (c *GrokClient) RunPromptCtx(ctx context.Context, prompt string, opts *RunO
 	if err != nil {
 		return nil, err
 	}
-	if prepared.Timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, prepared.Timeout)
-		defer cancel()
-	}
+	ctx, cancel := contextWithRunTimeout(ctx, prepared.Timeout)
+	defer cancel()
+
 	args := BuildArgs(prompt, prepared)
-	if prepared.BudgetTracker != nil {
-		if err := prepared.BudgetTracker.Check(); err != nil {
-			return nil, err
-		}
-		if prepared.MaxBudgetUSD > 0 && prepared.BudgetTracker.TotalSpent() > prepared.MaxBudgetUSD {
-			return nil, &GrokError{Type: ErrorValidation, Message: "per-call budget exceeded"}
-		}
+	if err := checkRunBudget(prepared); err != nil {
+		return nil, err
 	}
 	if prepared.PluginManager != nil {
 		if err := prepared.PluginManager.fireBefore(ctx, BeforeRunEvent{Prompt: prompt, Opts: prepared, Args: args}); err != nil {
 			return nil, err
 		}
 	}
-	cmd := execCommand(ctx, c.BinPath, args...)
-	cmd.Dir = c.workDir(prepared)
-	cmd.Env = c.envFor(prepared)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		exitCode := 1
-		if ee, ok := err.(*exec.ExitError); ok {
-			exitCode = ee.ExitCode()
-		}
-		ge := ParseError(stderr.String(), exitCode)
-		ge.Original = err
-		if prepared.PluginManager != nil {
-			_ = prepared.PluginManager.fireAfter(ctx, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Err: ge})
-		}
+
+	stdout, ge := c.runPromptCommand(ctx, args, prepared)
+	if ge != nil {
+		fireAfterRun(ctx, prepared, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Err: ge})
 		return nil, ge
 	}
-	result, err := decodeOutput(prepared.Format, stdout.Bytes())
+	result, err := decodeOutput(prepared.Format, stdout)
 	if err != nil {
 		return nil, err
 	}
-	if prepared.BudgetTracker != nil && result != nil {
-		prepared.BudgetTracker.Add(result.CostUSD)
-	}
-	if prepared.PluginManager != nil {
-		if err := prepared.PluginManager.fireAfter(ctx, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Result: result}); err != nil {
-			return result, err
-		}
+	trackRunBudget(prepared, result)
+	if err := fireAfterRun(ctx, prepared, AfterRunEvent{Prompt: prompt, Opts: prepared, Args: args, Result: result}); err != nil {
+		return result, err
 	}
 	return result, nil
 }
 
+func contextWithRunTimeout(ctx context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
+	if timeout > 0 {
+		return context.WithTimeout(ctx, timeout)
+	}
+	return ctx, func() {}
+}
+
+func checkRunBudget(opts *RunOptions) error {
+	if opts.BudgetTracker == nil {
+		return nil
+	}
+	if err := opts.BudgetTracker.Check(); err != nil {
+		return err
+	}
+	if opts.MaxBudgetUSD > 0 && opts.BudgetTracker.TotalSpent() > opts.MaxBudgetUSD {
+		return validationError("per-call budget exceeded")
+	}
+	return nil
+}
+
+func trackRunBudget(opts *RunOptions, result *GrokResult) {
+	if opts.BudgetTracker != nil && result != nil {
+		opts.BudgetTracker.Add(result.CostUSD)
+	}
+}
+
+func fireAfterRun(ctx context.Context, opts *RunOptions, ev AfterRunEvent) error {
+	if opts.PluginManager == nil {
+		return nil
+	}
+	return opts.PluginManager.fireAfter(ctx, ev)
+}
+
+func (c *GrokClient) runPromptCommand(ctx context.Context, args []string, opts *RunOptions) ([]byte, *GrokError) {
+	cmd := c.command(ctx, args...)
+	cmd.Dir = c.workDir(opts)
+	cmd.Env = c.envFor(opts)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return nil, grokErrorFromCommand(err, stderr.String())
+	}
+	return stdout.Bytes(), nil
+}
+
+func grokErrorFromCommand(err error, stderr string) *GrokError {
+	exitCode := 1
+	if ee, ok := err.(*exec.ExitError); ok {
+		exitCode = ee.ExitCode()
+	}
+	ge := ParseError(stderr, exitCode)
+	ge.Original = err
+	return ge
+}
+
 func (c *GrokClient) runSubcommandTolerant(ctx context.Context, args []string) ([]byte, error) {
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.WorkingDir
 	cmd.Env = c.envBase(nil)
 	var stdout, stderr bytes.Buffer
@@ -116,7 +167,7 @@ func (c *GrokClient) runSubcommandTolerant(ctx context.Context, args []string) (
 }
 
 func (c *GrokClient) runSubcommand(ctx context.Context, args []string) ([]byte, error) {
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.WorkingDir
 	cmd.Env = c.envBase(nil)
 	var stdout, stderr bytes.Buffer
@@ -189,25 +240,43 @@ func decodeOutput(format OutputFormat, data []byte) (*GrokResult, error) {
 
 func BuildArgs(prompt string, opts *RunOptions) []string {
 	args := []string{}
+	args = appendPromptArgs(args, prompt, opts)
+	args = appendOutputArgs(args, opts)
+	args = appendAgentArgs(args, opts)
+	args = appendPermissionArgs(args, opts)
+	args = appendSessionArgs(args, opts)
+	args = appendRuntimeArgs(args, opts)
+	args = appendModelArgs(args, opts)
+	args = appendTurnArgs(args, opts)
+	return appendPromptBehaviorArgs(args, opts)
+}
 
+func appendPromptArgs(args []string, prompt string, opts *RunOptions) []string {
 	switch {
 	case opts.PromptFile != "":
-		args = append(args, "--prompt-file", opts.PromptFile)
+		return append(args, "--prompt-file", opts.PromptFile)
 	case opts.PromptJSON != "":
-		args = append(args, "--prompt-json", opts.PromptJSON)
+		return append(args, "--prompt-json", opts.PromptJSON)
 	case prompt != "":
-		args = append(args, "-p", prompt)
+		return append(args, "-p", prompt)
 	case opts.Prompt != "":
-		args = append(args, "-p", opts.Prompt)
+		return append(args, "-p", opts.Prompt)
+	default:
+		return args
 	}
+}
 
+func appendOutputArgs(args []string, opts *RunOptions) []string {
 	if opts.Format != "" {
 		args = append(args, "--output-format", string(opts.Format))
 	}
-	if opts.InputFormat != "" {
-		args = append(args, "--input-format", string(opts.InputFormat))
+	if opts.JSONSchema != "" {
+		args = append(args, "--json-schema", opts.JSONSchema)
 	}
+	return args
+}
 
+func appendAgentArgs(args []string, opts *RunOptions) []string {
 	if opts.Agent != "" {
 		args = append(args, "--agent", opts.Agent)
 	} else if opts.AgentDefinitionFile != "" {
@@ -223,7 +292,10 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.NoSubagents {
 		args = append(args, "--no-subagents")
 	}
+	return args
+}
 
+func appendPermissionArgs(args []string, opts *RunOptions) []string {
 	for _, r := range opts.AllowRules {
 		args = append(args, "--allow", r)
 	}
@@ -249,7 +321,10 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.SandboxProfile != "" {
 		args = append(args, "--sandbox", opts.SandboxProfile)
 	}
+	return args
+}
 
+func appendSessionArgs(args []string, opts *RunOptions) []string {
 	if opts.ResumeID != "" {
 		args = append(args, "--resume", opts.ResumeID)
 	} else if opts.Continue {
@@ -258,6 +333,12 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.RestoreCode {
 		args = append(args, "--restore-code")
 	}
+	if opts.ForkSession {
+		args = append(args, "--fork-session")
+	}
+	if opts.SessionID != "" {
+		args = append(args, "-s", opts.SessionID)
+	}
 
 	if opts.NoMemory {
 		args = append(args, "--no-memory")
@@ -265,7 +346,10 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.ExperimentalMemory {
 		args = append(args, "--experimental-memory")
 	}
+	return args
+}
 
+func appendRuntimeArgs(args []string, opts *RunOptions) []string {
 	if opts.WorkingDirectory != "" {
 		args = append(args, "--cwd", opts.WorkingDirectory)
 	}
@@ -275,8 +359,14 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 		} else {
 			args = append(args, "-w")
 		}
+		if opts.Worktree.Ref != "" {
+			args = append(args, "--worktree-ref", opts.Worktree.Ref)
+		}
 	}
+	return args
+}
 
+func appendModelArgs(args []string, opts *RunOptions) []string {
 	if opts.Model != "" {
 		args = append(args, "--model", opts.Model)
 	}
@@ -286,7 +376,10 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.ReasoningEffort != "" {
 		args = append(args, "--reasoning-effort", opts.ReasoningEffort)
 	}
+	return args
+}
 
+func appendTurnArgs(args []string, opts *RunOptions) []string {
 	if opts.MaxTurns > 0 {
 		args = append(args, "--max-turns", strconv.Itoa(opts.MaxTurns))
 	}
@@ -302,7 +395,10 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 	if opts.NoAltScreen {
 		args = append(args, "--no-alt-screen")
 	}
+	return args
+}
 
+func appendPromptBehaviorArgs(args []string, opts *RunOptions) []string {
 	if opts.SystemPromptOverride != "" {
 		args = append(args, "--system-prompt-override", opts.SystemPromptOverride)
 	}
@@ -315,20 +411,9 @@ func BuildArgs(prompt string, opts *RunOptions) []string {
 		args = append(args, "--verbatim")
 	}
 
-	for _, mc := range opts.MCPConfigs {
-		args = append(args, "--mcp-config", mc)
-	}
-	if opts.MCPConfigPath != "" && len(opts.MCPConfigs) == 0 {
-		args = append(args, "--mcp-config", opts.MCPConfigPath)
-	}
-	if opts.StrictMCPConfig {
-		args = append(args, "--strict-mcp-config")
-	}
-
 	if opts.OAuth {
 		args = append(args, "--oauth")
 	}
-
 	return args
 }
 

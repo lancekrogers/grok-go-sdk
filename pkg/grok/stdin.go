@@ -22,7 +22,7 @@ func (c *GrokClient) RunFromStdinCtx(ctx context.Context, stdin io.Reader, promp
 		defer cancel()
 	}
 	args := BuildArgs(prompt, prepared)
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.workDir(prepared)
 	cmd.Env = c.envFor(prepared)
 	cmd.Stdin = stdin

@@ -43,8 +43,25 @@ func (c *GrokClient) LeaderKill(ctx context.Context) error {
 	return err
 }
 
-func (c *GrokClient) LeaderProfileStart(ctx context.Context, pid int) error {
-	_, err := c.runSubcommand(ctx, leaderProfileArgs("start", pid))
+// LeaderProfileStartOptions configures LeaderProfileStart.
+type LeaderProfileStartOptions struct {
+	Output      string // --output: profile output path
+	FrequencyHz int    // --frequency-hz: sampling frequency
+	JSON        bool   // --json
+}
+
+func (c *GrokClient) LeaderProfileStart(ctx context.Context, pid int, opts LeaderProfileStartOptions) error {
+	args := leaderProfileArgs("start", pid)
+	if opts.Output != "" {
+		args = append(args, "--output", opts.Output)
+	}
+	if opts.FrequencyHz > 0 {
+		args = append(args, "--frequency-hz", strconv.Itoa(opts.FrequencyHz))
+	}
+	if opts.JSON {
+		args = append(args, "--json")
+	}
+	_, err := c.runSubcommand(ctx, args)
 	return err
 }
 

@@ -18,7 +18,6 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"prompt json", "", &RunOptions{PromptJSON: `{"k":"v"}`}, []string{"--prompt-json", `{"k":"v"}`}},
 		{"json format", "x", &RunOptions{Format: JSONOutput}, []string{"--output-format", "json"}},
 		{"streaming format", "x", &RunOptions{Format: StreamingJSONOutput}, []string{"--output-format", "streaming-json"}},
-		{"input format", "x", &RunOptions{InputFormat: StreamJSONInput}, []string{"--input-format", "stream-json"}},
 		{"agent name", "x", &RunOptions{Agent: "security"}, []string{"--agent", "security"}},
 		{"agent file fallback", "x", &RunOptions{AgentDefinitionFile: "/tmp/a.json"}, []string{"--agent", "/tmp/a.json"}},
 		{"agents json raw", "x", &RunOptions{AgentsJSON: `{"x":1}`}, []string{"--agents", `{"x":1}`}},
@@ -35,11 +34,14 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"resume id", "x", &RunOptions{ResumeID: "abc"}, []string{"--resume", "abc"}},
 		{"continue", "x", &RunOptions{Continue: true}, []string{"--continue"}},
 		{"restore code", "x", &RunOptions{ResumeID: "abc", RestoreCode: true}, []string{"--restore-code"}},
+		{"session id alone", "x", &RunOptions{SessionID: "uuid-1"}, []string{"-s", "uuid-1"}},
+		{"fork with resume", "x", &RunOptions{ResumeID: "abc", ForkSession: true, SessionID: "uuid-2"}, []string{"--resume", "abc", "--fork-session", "-s", "uuid-2"}},
 		{"no memory", "x", &RunOptions{NoMemory: true}, []string{"--no-memory"}},
 		{"experimental memory", "x", &RunOptions{ExperimentalMemory: true}, []string{"--experimental-memory"}},
 		{"cwd", "x", &RunOptions{WorkingDirectory: "/tmp"}, []string{"--cwd", "/tmp"}},
 		{"worktree named", "x", &RunOptions{Worktree: WorktreeOption{Enabled: true, Name: "wt1"}}, []string{"-w", "wt1"}},
 		{"worktree bare", "x", &RunOptions{Worktree: WorktreeOption{Enabled: true}}, []string{"-w"}},
+		{"worktree with ref", "x", &RunOptions{Worktree: WorktreeOption{Enabled: true, Name: "wt1", Ref: "main"}}, []string{"-w", "wt1", "--worktree-ref", "main"}},
 		{"model", "x", &RunOptions{Model: "grok-build"}, []string{"--model", "grok-build"}},
 		{"effort", "x", &RunOptions{Effort: EffortHigh}, []string{"--effort", "high"}},
 		{"reasoning effort", "x", &RunOptions{ReasoningEffort: "high"}, []string{"--reasoning-effort", "high"}},
@@ -52,9 +54,6 @@ func TestBuildArgs_Coverage(t *testing.T) {
 		{"rules inline", "x", &RunOptions{Rules: "be terse"}, []string{"--rules", "be terse"}},
 		{"rules file", "x", &RunOptions{RulesFile: "/tmp/r.txt"}, []string{"--rules", "@/tmp/r.txt"}},
 		{"verbatim", "x", &RunOptions{Verbatim: true}, []string{"--verbatim"}},
-		{"mcp config single", "x", &RunOptions{MCPConfigPath: "/tmp/m.json"}, []string{"--mcp-config", "/tmp/m.json"}},
-		{"mcp config multi", "x", &RunOptions{MCPConfigs: []string{"a.json", "b.json"}}, []string{"--mcp-config", "a.json", "--mcp-config", "b.json"}},
-		{"strict mcp", "x", &RunOptions{StrictMCPConfig: true}, []string{"--strict-mcp-config"}},
 		{"oauth", "x", &RunOptions{OAuth: true}, []string{"--oauth"}},
 	}
 
@@ -88,6 +87,32 @@ func TestBuildArgs_AllowDenyOrder(t *testing.T) {
 	want := []string{"-p", "hi", "--allow", "a1", "--allow", "a2", "--deny", "d1"}
 	if !reflect.DeepEqual(args, want) {
 		t.Errorf("got %v want %v", args, want)
+	}
+}
+
+func TestBuildArgs_JSONSchema(t *testing.T) {
+	schema := "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\"type\": \"string\"}\n  }\n}"
+	opts := &RunOptions{Prompt: "x", JSONSchema: schema}
+	if err := PreprocessOptions(opts); err != nil {
+		t.Fatalf("preprocess: %v", err)
+	}
+	if opts.Format != JSONOutput {
+		t.Fatalf("JSONSchema should imply JSONOutput, got %q", opts.Format)
+	}
+	args := BuildArgs("x", opts)
+	if !contains(args, "--output-format") || !contains(args, "json") {
+		t.Fatalf("missing implied --output-format json: %v", args)
+	}
+	// The schema must travel as a single argv element, never split on its newlines.
+	pos := -1
+	for i, a := range args {
+		if a == "--json-schema" {
+			pos = i
+			break
+		}
+	}
+	if pos < 0 || pos+1 >= len(args) || args[pos+1] != schema {
+		t.Fatalf("schema not passed as a single argv element: %v", args)
 	}
 }
 

@@ -88,7 +88,7 @@ func (c *GrokClient) StreamPrompt(ctx context.Context, prompt string, opts *RunO
 	prepared.Format = StreamingJSONOutput
 
 	args := BuildArgs(prompt, prepared)
-	cmd := execCommand(ctx, c.BinPath, args...)
+	cmd := c.command(ctx, args...)
 	cmd.Dir = c.workDir(prepared)
 	cmd.Env = c.envFor(prepared)
 	var stderr bytes.Buffer

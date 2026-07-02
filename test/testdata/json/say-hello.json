@@ -1,7 +1,7 @@
 {
-  "text": "Hello! How can I help you today?",
+  "text": "Hello! 👋 How can I help you today?",
   "stopReason": "EndTurn",
-  "sessionId": "019e3255-4a03-7dd3-94a0-09143882d053",
-  "requestId": "6a85decc-5a9d-4256-8467-ed32732a46af",
-  "thought": "The user just said \"say hello\". This is a simple greeting request. I should respond in a friendly, direct manner.\n"
+  "sessionId": "019f2010-8cce-7980-acac-fc0ca4c21f70",
+  "requestId": "aad62d88-fc11-4ef3-a90c-03358d253b2c",
+  "thought": "The user said \"say hello\". This is a very simple request. I should just respond with a friendly hello.\n"
 }

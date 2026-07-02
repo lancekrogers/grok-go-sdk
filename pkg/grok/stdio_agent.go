@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"os/exec"
 	"strconv"
@@ -46,7 +44,7 @@ func (c *GrokClient) StartStdioAgent(ctx context.Context, cfg *StdioConfig) (*St
 	if cfg == nil {
 		cfg = &StdioConfig{}
 	}
-	cmd := execCommand(ctx, c.BinPath, "agent", "stdio")
+	cmd := c.command(ctx, "agent", "stdio")
 	cmd.Env = c.envBase(cfg.Env)
 
 	stdin, err := cmd.StdinPipe()
@@ -96,7 +94,7 @@ func (s *StdioSession) Call(ctx context.Context, method string, params any, resu
 	if params != nil {
 		b, err := json.Marshal(params)
 		if err != nil {
-			return fmt.Errorf("marshal params: %w", err)
+			return validationErrorWithOriginal("marshal params", err)
 		}
 		paramsRaw = b
 	}
@@ -118,14 +116,14 @@ func (s *StdioSession) Call(ctx context.Context, method string, params any, resu
 		}
 		if result != nil && len(resp.Result) > 0 {
 			if err := json.Unmarshal(resp.Result, result); err != nil {
-				return fmt.Errorf("unmarshal result for %s: %w", method, err)
+				return validationErrorWithOriginal("unmarshal result for "+method, err)
 			}
 		}
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()
 	case <-s.closed:
-		return errors.New("stdio session closed before response")
+		return transportError("stdio session closed before response", nil)
 	}
 }
 
@@ -217,7 +215,7 @@ func (s *StdioSession) readLoop() {
 		}
 		var m RPCMessage
 		if err := json.Unmarshal(line, &m); err != nil {
-			s.sendErr(fmt.Errorf("decode rpc message: %w (line=%s)", err, truncate(line, 200)))
+			s.sendErr(transportErrorf(err, "decode rpc message (line=%s)", truncate(line, 200)))
 			continue
 		}
 		m.Raw = line
@@ -232,7 +230,7 @@ func (s *StdioSession) readLoop() {
 		}
 	}
 	if err := sc.Err(); err != nil {
-		s.sendErr(fmt.Errorf("scanner: %w", err))
+		s.sendErr(transportError("scanner", err))
 	}
 }
 

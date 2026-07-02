@@ -2,6 +2,7 @@ package grok
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -52,7 +53,7 @@ func (c *GrokClient) WorktreeRemove(ctx context.Context, ids []string, force, dr
 func (c *GrokClient) WorktreeGC(ctx context.Context, maxAge time.Duration, force, dryRun bool) error {
 	args := []string{"worktree", "gc"}
 	if maxAge > 0 {
-		args = append(args, "--max-age", maxAge.String())
+		args = append(args, "--max-age", formatWorktreeMaxAge(maxAge))
 	}
 	if force {
 		args = append(args, "-f")
@@ -62,6 +63,21 @@ func (c *GrokClient) WorktreeGC(ctx context.Context, maxAge time.Duration, force
 	}
 	_, err := c.runSubcommand(ctx, args)
 	return err
+}
+
+func formatWorktreeMaxAge(d time.Duration) string {
+	switch {
+	case d%time.Hour == 0:
+		return strconv.FormatInt(int64(d/time.Hour), 10) + "h"
+	case d%time.Minute == 0:
+		return strconv.FormatInt(int64(d/time.Minute), 10) + "m"
+	default:
+		seconds := int64((d + time.Second - 1) / time.Second)
+		if seconds < 1 {
+			seconds = 1
+		}
+		return strconv.FormatInt(seconds, 10) + "s"
+	}
 }
 
 func (c *GrokClient) WorktreeDBRebuild(ctx context.Context) error {

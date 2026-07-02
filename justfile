@@ -43,6 +43,14 @@ tidy-all:
 lint:
     just util lint
 
+# Check live grok CLI help against the committed snapshot
+cli-drift:
+    just util cli-drift
+
+# Refresh the committed grok CLI help snapshot
+cli-drift-update:
+    just util cli-drift-update
+
 # Generate coverage report
 coverage-report:
     just coverage report

@@ -2,6 +2,9 @@ package grok
 
 import (
 	"context"
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -19,6 +22,41 @@ func TestLeaderList_AgainstMock(t *testing.T) {
 	}
 }
 
+func TestLeaderList_CapturedFixture(t *testing.T) {
+	path := filepath.Join("..", "..", "test", "testdata", "leader-list.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Skipf("fixture not yet captured: %v", err)
+	}
+	var list []LeaderInfo
+	if err := json.Unmarshal(data, &list); err != nil {
+		t.Fatalf("decode leader fixture: %v", err)
+	}
+	for i, item := range list {
+		if item.PID == 0 {
+			t.Fatalf("leader %d missing pid: %#v", i, item)
+		}
+	}
+}
+
+func TestVersion_CapturedFixture(t *testing.T) {
+	path := filepath.Join("..", "..", "test", "testdata", "version.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Skipf("fixture not yet captured: %v", err)
+	}
+	var version struct {
+		CurrentVersion string `json:"currentVersion"`
+		Channel        string `json:"channel"`
+	}
+	if err := json.Unmarshal(data, &version); err != nil {
+		t.Fatalf("decode version fixture: %v", err)
+	}
+	if version.CurrentVersion == "" || version.Channel == "" {
+		t.Fatalf("incomplete version fixture: %#v", version)
+	}
+}
+
 func TestLeaderKill_AgainstMock(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
@@ -30,7 +68,7 @@ func TestLeaderKill_AgainstMock(t *testing.T) {
 func TestLeaderProfile_AgainstMock(t *testing.T) {
 	mock := buildOrLocateMock(t)
 	c := NewClient(mock)
-	if err := c.LeaderProfileStart(context.Background(), 1234); err != nil {
+	if err := c.LeaderProfileStart(context.Background(), 1234, LeaderProfileStartOptions{}); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 	if err := c.LeaderProfileStop(context.Background(), 1234); err != nil {

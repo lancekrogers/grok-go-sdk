@@ -1,9 +1,21 @@
 package grok
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
+
+func requireValidationError(t *testing.T, err error) {
+	t.Helper()
+	var ge *GrokError
+	if !errors.As(err, &ge) {
+		t.Fatalf("expected GrokError, got %T: %v", err, err)
+	}
+	if ge.Type != ErrorValidation {
+		t.Fatalf("expected validation error, got %s: %v", ge.Type, err)
+	}
+}
 
 func TestEnumConstants(t *testing.T) {
 	cases := []struct {
@@ -12,8 +24,6 @@ func TestEnumConstants(t *testing.T) {
 		{string(PlainOutput), "plain"},
 		{string(JSONOutput), "json"},
 		{string(StreamingJSONOutput), "streaming-json"},
-		{string(TextInput), "text"},
-		{string(StreamJSONInput), "stream-json"},
 		{string(EffortLow), "low"},
 		{string(EffortMedium), "medium"},
 		{string(EffortHigh), "high"},
@@ -38,6 +48,7 @@ func TestPreprocessOptions_BestOfNWithoutPrompt(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
+	requireValidationError(t, err)
 	if !strings.Contains(err.Error(), "BestOfN") {
 		t.Errorf("expected BestOfN message, got %v", err)
 	}
@@ -48,6 +59,7 @@ func TestPreprocessOptions_CheckWithoutPrompt(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
+	requireValidationError(t, err)
 }
 
 func TestPreprocessOptions_BothMemoryFlags(t *testing.T) {
@@ -116,17 +128,33 @@ func TestPreprocessOptions_EnvPermissiveSandboxRequiresDangerous(t *testing.T) {
 	}
 }
 
-func TestPreprocessOptions_ForkRejected(t *testing.T) {
-	err := PreprocessOptions(&RunOptions{Prompt: "x", ForkSession: true})
-	if err == nil {
-		t.Fatal("expected error (fork not supported yet)")
+func TestPreprocessOptions_ForkRequiresResume(t *testing.T) {
+	// ForkSession only makes sense when resuming/continuing.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", ForkSession: true}); err == nil {
+		t.Fatal("expected error: ForkSession without resume/continue")
+	}
+	// SessionID alone (new conversation) is fine.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", SessionID: "uuid-1"}); err != nil {
+		t.Fatalf("SessionID alone should be valid: %v", err)
+	}
+	// Resume + SessionID without ForkSession is rejected.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", ResumeID: "abc", SessionID: "uuid-2"}); err == nil {
+		t.Fatal("expected error: SessionID + resume without ForkSession")
+	}
+	// Resume + ForkSession + SessionID is valid.
+	if err := PreprocessOptions(&RunOptions{Prompt: "x", ResumeID: "abc", ForkSession: true, SessionID: "uuid-2"}); err != nil {
+		t.Fatalf("resume + fork + session-id should be valid: %v", err)
 	}
 }
 
 func TestPreprocessOptions_RestoreCodeRequiresResume(t *testing.T) {
 	err := PreprocessOptions(&RunOptions{Prompt: "x", RestoreCode: true})
 	if err == nil {
-		t.Fatal("expected error (RestoreCode requires ResumeID)")
+		t.Fatal("expected error (RestoreCode requires ResumeID or Continue)")
+	}
+	err = PreprocessOptions(&RunOptions{Prompt: "x", Continue: true, RestoreCode: true})
+	if err != nil {
+		t.Fatalf("Continue + RestoreCode should be valid: %v", err)
 	}
 }
 

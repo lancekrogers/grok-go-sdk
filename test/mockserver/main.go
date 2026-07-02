@@ -53,6 +53,9 @@ func route(args []string) int {
 		return 0
 	case "import":
 		return 0
+	case "export":
+		fmt.Println("# Mock transcript\n\nhello")
+		return 0
 	case "inspect":
 		return doInspect(args[1:])
 	case "models":
@@ -63,13 +66,20 @@ func route(args []string) int {
 		return doMCP(args[1:])
 	case "memory":
 		return 0
+	case "plugin":
+		return doPlugin(args[1:])
 	case "worktree":
 		return doWorktree(args[1:])
 	case "update":
 		return doUpdate(args[1:])
 	case "setup":
 		return 0
+	case "completions":
+		fmt.Println("# mock completion script")
+		return 0
 	case "login":
+		return 0
+	case "logout":
 		return 0
 	case "agent":
 		return doAgent(args[1:])
@@ -89,6 +99,9 @@ func doPrompt(args []string) int {
 	case "json":
 		return emitFixture("json/" + scenario + ".json")
 	case "streaming-json":
+		if scenario == "say-hello" {
+			scenario = "basic"
+		}
 		return emitFixture("streaming-json/" + scenario + ".jsonl")
 	case "plain", "":
 		return emitPlain(scenario)
@@ -155,6 +168,25 @@ func locateTestdata() string {
 	}
 }
 
+func doPlugin(args []string) int {
+	if len(args) == 0 {
+		return 0
+	}
+	switch args[0] {
+	case "list":
+		fmt.Println("mock-plugin v1.0 (enabled)")
+	case "details":
+		fmt.Println("Components: 1 command, 0 agents")
+	case "validate":
+		fmt.Println("Manifest OK")
+	case "marketplace":
+		if len(args) > 1 && args[1] == "list" {
+			fmt.Println("mock-marketplace: https://example.invalid/mp")
+		}
+	}
+	return 0
+}
+
 func doSessions(args []string) int {
 	if len(args) == 0 {
 		return 0
@@ -162,13 +194,15 @@ func doSessions(args []string) int {
 	switch args[0] {
 	case "list", "search":
 		fmt.Println("mock-session-01HMOCK0000000000000000000\t2026-05-16T02:00:00Z\t/tmp\tmock summary")
+	case "delete":
+		// success, no output
 	}
 	return 0
 }
 
 func doInspect(args []string) int {
 	if flagSet(args, "--json") {
-		fmt.Println(`{"version":"mock","cwd":"/tmp","git_root":"/tmp","project_trusted":true,"project_instructions":[],"permissions":{},"skills":[]}`)
+		fmt.Println(`{"grokVersion":"mock","channel":"stable","cwd":"/tmp","projectRoot":"/tmp/","projectTrusted":true,"bridgeTrusted":true,"projectInstructions":[],"permissions":{},"loginPolicy":{},"hooks":[],"skills":[],"agents":[],"plugins":[],"marketplaces":[],"mcpServers":[],"lspServers":[],"configSources":{},"externalCompat":{}}`)
 		return 0
 	}
 	fmt.Println("Mock inspect output (use --json for machine-readable)")

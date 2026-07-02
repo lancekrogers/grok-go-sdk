@@ -2,7 +2,6 @@ package grok
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -70,5 +69,9 @@ func (c *GrokClient) RunPromptWithRetryCtx(ctx context.Context, prompt string, o
 			return nil, err
 		}
 	}
-	return nil, fmt.Errorf("max retries (%d) exceeded: %w", policy.MaxRetries, lastErr)
+	return nil, &GrokError{
+		Type:     ErrorProcess,
+		Message:  validationErrorf("max retries (%d) exceeded", policy.MaxRetries).Message,
+		Original: lastErr,
+	}
 }

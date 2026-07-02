@@ -33,8 +33,9 @@ retry policies.
 
 ### Advanced
 - `StartStdioAgent`: full-duplex JSON-RPC-style session with `RequestResponse`.
-- `RunHeadlessAgent`, `StartServeAgent`, `LeaderList`/`Info`/`Kill`/`Profile*`.
-- Admin subcommand wrappers: `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Inspect`, `Models`, `Share`, `Trace`, `Import`, `SessionsList`/`Search`.
+- `RunHeadlessAgent`, `StartServeAgent`, `StartLeaderAgent`, `LeaderList`/`Info`/`Kill`/`Profile*`.
+- Admin subcommand wrappers: `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Logout`, `Inspect`, `Models`, `Export`, `Trace`, `Import`, `Completions`, `SessionsList`/`Search`/`Delete`.
+- `grok plugin` tree: `Plugin*` (install/uninstall/enable/…) and `Marketplace*` wrappers.
 - Permission rule validation + built-in tool name constants.
 - Sandbox-profile resolution + permissive heuristic.
 - Subagent JSON marshaling.
@@ -44,6 +45,14 @@ retry policies.
 - Four built-in plugins: `LoggingPlugin`, `MetricsPlugin`, `AuditPlugin`, `ToolFilterPlugin`.
 - `BudgetTracker` with warning/exceeded callbacks.
 - `RetryPolicy` with backoff, jitter, and rate-limit honor.
+
+## Out of scope
+
+`grok wrap` (a PTY/clipboard passthrough that replaced the old `grok ssh`) and
+`grok dashboard` (an interactive TUI) are interactive, terminal-bound commands.
+They are intentionally **not** wrapped by this headless SDK — run the `grok`
+binary directly for those. Shell completion scripts are available via
+`Completions(ctx, shell)`.
 
 ## Installation
 
@@ -179,7 +188,6 @@ opts := &grok.RunOptions{
 | Field | Purpose |
 |-------|---------|
 | `Format` | `JSONOutput`, `StreamingJSONOutput`, `PlainOutput` |
-| `InputFormat` | `TextInput`, `StreamJSONInput` |
 | `Model` | model identifier (e.g. `grok-build`) |
 | `WorkingDirectory` | overrides the spawned `grok` process cwd |
 | `Timeout` | per-call timeout (uses `context.WithTimeout`) |
@@ -204,7 +212,7 @@ opts := &grok.RunOptions{
 | `StartStdioAgent` | long-lived agent session |
 | `RunPromptWithRetry*` | retry-wrapped single-shot |
 | `ContinueConversation*`, `ResumeConversation*` | session helpers |
-| `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Inspect`, `Models`, `Share`, `Trace`, `Import`, `Sessions*`, `Leader*` | admin wrappers |
+| `MCP*`, `Worktree*`, `Memory*`, `Update*`, `Setup`, `Login`, `Logout`, `Inspect`, `Models`, `Export`, `Trace`, `Import`, `Completions`, `Sessions*`, `Plugin*`, `Marketplace*`, `Leader*` | admin wrappers |
 
 ## Security-Sensitive Features
 
@@ -243,7 +251,7 @@ just demo basic     # run an example
 - [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md) - every flag the SDK emits
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - subprocess/IPC architecture
 - [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - dev environment + PR norms
-- [docs/RELEASE_NOTES_v0.1.0.md](docs/RELEASE_NOTES_v0.1.0.md) - changelog
+- [docs/RELEASE_NOTES_v0.2.0.md](docs/RELEASE_NOTES_v0.2.0.md) - changelog
 
 ## Contributing
 

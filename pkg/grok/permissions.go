@@ -1,7 +1,6 @@
 package grok
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -18,7 +17,9 @@ func ValidateAllowDenyRule(rule string) error {
 func validateRules(rules []string, label string) error {
 	for i, r := range rules {
 		if err := ValidateAllowDenyRule(r); err != nil {
-			return fmt.Errorf("validation: %s[%d]: %w", label, i, err)
+			ge := validationErrorf("%s[%d]: %s", label, i, err.Error())
+			ge.Original = err
+			return ge
 		}
 	}
 	return nil
