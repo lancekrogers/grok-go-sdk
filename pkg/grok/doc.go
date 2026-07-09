@@ -1,4 +1,4 @@
-// Package grok provides a Go wrapper around the grok CLI.
+// Package grok is the grok-go-sdk library, a Go wrapper around the grok CLI.
 //
 // It exposes typed helpers for headless prompts, streaming output, sessions,
 // stdio-agent conversations, MCP management, worktrees, permissions, budgets,
