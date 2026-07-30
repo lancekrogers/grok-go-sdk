@@ -8,162 +8,101 @@ Grok Build TUI
 Usage: grok [OPTIONS] [PROMPT] [COMMAND]
 
 Arguments:
-  [PROMPT]
-          Initial prompt for the interactive session, e.g. `grok "fix the bug"` or `grok --worktree=feat "create this feature"`
+  [PROMPT]  Initial prompt for the interactive session, e.g. `grok "fix the bug"` or `grok --worktree=feat "create this feature"`
 
 Options:
       --agent <NAME>
           Agent name or definition file path
-
       --agents <JSON>
           Inline subagent definitions as JSON
-
       --allow <RULE>
-          Permission allow rule (Claude Code: --allowedTools)
-
+          Permission allow rule (compat alias: --allowedTools)
       --always-approve
           Auto-approve all tool executions
-
-      --best-of-n <N>
-          Run the task N ways in parallel and pick the best (headless only)
-
   -c, --continue
           Continue the most recent session for the current working directory
-
-      --chat
-          Open session as gateway light-frontend (`kind: chat`).
-
-          Connects to the production gateway (`wss://grok.com/ws/gw/`) unless `GROK_GATEWAY_URL` / `GROK_PRODUCTION_GATEWAY_WS_URL` is set. Mutually exclusive with Build plan agent profiles (profiles are omitted when combined with plan flags).
-
-      --check
-          Append a self-verification loop to the prompt (headless only)
-
       --cwd <CWD>
           Working directory
-
       --debug
           Enable debug logging
-
       --debug-file <FILE>
           Write debug logs to FILE
-
       --deny <RULE>
-          Permission deny rule (Claude Code: --disallowedTools)
-
+          Permission deny rule (compat alias: --disallowedTools)
       --disable-web-search
           Disable web search and web fetch tools
-
       --disallowed-tools <TOOLS>
           Built-in tools to remove (comma-separated)
-
-      --effort <LEVEL>
-          Effort level
-
-          [possible values: low, medium, high, xhigh, max]
-
       --experimental-memory
           Enable cross-session memory
-
       --fork-session
           When resuming (`--resume` / `--continue`), create a new session ID instead of reusing the original (optionally set via `--session-id`)
-
+      --fullscreen
+          Open in the standard fullscreen TUI for this session, overriding a config `[ui] screen_mode = "minimal"` preference. Session-scoped only — does not write config. Fullscreen-vs-inline still follows the alt-screen policy (--no-alt-screen, [terminal] alt_screen, terminal auto-detection)
   -h, --help
-          Print help (see a summary with '-h')
-
+          Print help
       --json-schema <SCHEMA>
           JSON Schema for structured output. When set, the model is constrained to produce JSON matching this schema. Implies --output-format json. Example: --json-schema '{"type":"object","properties":{"name":{"type":"string"}}}'
-
       --leader-socket <PATH>
           Use a custom leader socket path instead of the default `~/.grok/leader.sock`
-
   -m, --model <MODEL>
           Model ID to use
-
       --max-turns <N>
           Maximum number of agent turns
-
+      --minimal
+          Experimental: scrollback-native rendering. Finalized blocks are printed into the terminal's native scrollback (use the terminal's own scroll / selection); a small pinned region holds the prompt + running turn. Session-scoped only — does not write config. To default plain `grok` to minimal, set `[ui] screen_mode = "minimal"` in ~/.grok/config.toml
       --no-alt-screen
           Run inline instead of using the terminal alternate screen
-
       --no-memory
           Disable cross-session memory for this session
-
       --no-plan
           Disable plan mode
-
       --no-subagents
           Disable subagent spawning
-
       --oauth
           Use OAuth when the welcome screen starts authentication
-
       --output-format <OUTPUT_FORMAT>
-          Output format for headless mode
-
-          [default: plain]
-          [possible values: plain, json, streaming-json]
-
+          Output format for headless mode [default: plain] [possible values: plain, json, streaming-json]
   -p, --single <PROMPT>
           Single-turn prompt. Prints the response to stdout and exits
-
       --permission-mode <MODE>
-          Permission mode
-
-          [possible values: default, acceptEdits, auto, dontAsk, bypassPermissions, plan]
-
+          Permission mode [possible values: default, acceptEdits, auto, dontAsk, bypassPermissions, plan]
       --prompt-file <PATH>
           Single-turn prompt from a file
-
       --prompt-json <JSON>
           Single-turn prompt as JSON content blocks
-
-  -r, --resume [<SESSION_ID>]
-          Resume a session by ID, or the most recent if omitted
-
+  -r, --resume [<SESSION_ID_OR_TITLE>]
+          Resume a session by ID or title, or the most recent if omitted. Non-ID values match session titles for the current directory (ignoring letter case; a sole renamed match wins among duplicates, otherwise ambiguity errors; UUID-shaped values always mean IDs)
       --reasoning-effort <EFFORT>
-          Reasoning effort for reasoning models
-
+          Reasoning effort for reasoning models [aliases: --effort]
       --restore-code
           Check out the original session's commit when resuming
-
       --rules <RULES>
           Extra rules to append to the system prompt
-
   -s, --session-id <SESSION_ID>
           Use a specific session UUID for a **new** conversation (must be a valid UUID and must not already exist under the target session directory). With `--resume`/`--continue`, only valid together with `--fork-session` (names the forked session). Does not resume existing sessions — use `--resume` / `--continue` instead
-
       --sandbox <PROFILE>
-          Sandbox profile for filesystem and network access
-
-          [env: GROK_SANDBOX=]
-
+          Sandbox profile for filesystem and network access [env: GROK_SANDBOX=]
       --system-prompt-override <PROMPT>
-          Override the agent's system prompt (Claude Code: --system-prompt)
-
+          Override the agent's system prompt (compat alias: --system-prompt)
       --tools <TOOLS>
           Built-in tools to allow (comma-separated)
-
   -v, --version
           Print version
-
       --verbatim
           Send the prompt exactly as given
-
   -w, --worktree [<WORKTREE>]
           Start the session in a new git worktree, optionally named
-
       --worktree-ref <WORKTREE_REF>
-          Branch, tag, or commit to base the worktree on (with `--worktree`). Defaults to the current HEAD of the source checkout when omitted
-
-          [aliases: --ref]
+          Branch, tag, or commit to base the worktree on (with `--worktree`). Defaults to the current HEAD of the source checkout when omitted [aliases: --ref]
 
 Commands:
   agent        Run Grok without the interactive UI
   completions  Generate shell completion scripts (bash, zsh, fish, powershell, ...)
   dashboard    Open the Agent Dashboard view at startup
+  doctor       Check terminal, clipboard, color, and input support without starting Grok
   export       Export a session transcript as Markdown
   help         Print this message or the help of the given subcommand(s)
-  import       Import sessions into Grok
   inspect      Show the configuration Grok discovers for this directory
   leader       Manage running leader processes
   login        Sign in to Grok
@@ -199,11 +138,13 @@ Options:
   -m, --model <MODEL>
           Model ID to use
       --reasoning-effort <EFFORT>
-          Reasoning effort for reasoning models
+          Reasoning effort for reasoning models [aliases: --effort]
       --always-approve
           Auto-approve all tool executions
       --agent-profile <PATH>
           Path to an agent profile file
+      --plugin-dir <DIR>
+          Load a plugin from this directory for this process only (repeatable). Highest-priority plugin scope; always trusted — hooks and MCP servers activate without a prompt. Used by the Agent SDKs to inject per-connection plugins
       --leader
           Connect to a shared leader process instead of starting a new agent. Allows multiple clients to share one backend. Defaults to [cli] use_leader in config.toml
       --no-leader
@@ -293,7 +234,7 @@ Options:
       --no-exit-on-disconnect
           Keep the leader running after the last client disconnects
       --relay-on-demand
-          Defer the grok.com relay WebSocket until the first headless IPC client registers. Without this flag the leader connects the relay eagerly at startup — required for bare leaders (devbox/systemd) that receive remote prompts *through* the relay. Passed by leaders auto-spawned from interactive clients (TUI/IDE), which only need the relay if a headless client appears
+          Defer the grok.com relay WebSocket until the first headless IPC client registers. Without this flag the leader connects the relay eagerly at startup — required for bare leaders (headless remote env / systemd) that receive remote prompts *through* the relay. Passed by leaders auto-spawned from interactive clients (TUI/IDE), which only need the relay if a headless client appears
       --no-auto-update
           Disable periodic auto-update checks for the leader
       --grok-ws-origin <GROK_WS_ORIGIN>
@@ -316,11 +257,10 @@ Manage running leader processes
 Usage: grok leader [OPTIONS] <COMMAND>
 
 Commands:
-  list     List running leader processes
-  info     Show details for a leader process
-  kill     Stop all running leader processes
-  profile  Manage CPU profiling for a leader process
-  help     Print this message or the help of the given subcommand(s)
+  list  List running leader processes
+  info  Show details for a leader process
+  kill  Stop all running leader processes
+  help  Print this message or the help of the given subcommand(s)
 
 Options:
       --debug                 Enable debug logging
@@ -367,68 +307,6 @@ Options:
   -h, --help                  Print help
       --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
 
-## grok leader profile --help
-
-Manage CPU profiling for a leader process
-
-Usage: grok leader profile [OPTIONS] <COMMAND>
-
-Commands:
-  status  Show profiling status
-  start   Start CPU profiling
-  stop    Stop CPU profiling
-  help    Print this message or the help of the given subcommand(s)
-
-Options:
-      --debug                 Enable debug logging
-      --debug-file <FILE>     Write debug logs to FILE
-  -h, --help                  Print help
-      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
-
-## grok leader profile status --help
-
-Show profiling status
-
-Usage: grok leader profile status [OPTIONS]
-
-Options:
-      --pid <PID>             Leader process ID from `grok leader list`
-      --json
-      --debug                 Enable debug logging
-      --debug-file <FILE>     Write debug logs to FILE
-  -h, --help                  Print help
-      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
-
-## grok leader profile start --help
-
-Start CPU profiling
-
-Usage: grok leader profile start [OPTIONS]
-
-Options:
-      --pid <PID>                    Leader process ID from `grok leader list`
-      --output <OUTPUT>              Output path for the profile
-      --frequency-hz <FREQUENCY_HZ>  Sampling frequency in Hz
-      --json
-      --debug                        Enable debug logging
-      --debug-file <FILE>            Write debug logs to FILE
-  -h, --help                         Print help
-      --leader-socket <PATH>         Use a custom leader socket path instead of the default `~/.grok/leader.sock`
-
-## grok leader profile stop --help
-
-Stop CPU profiling
-
-Usage: grok leader profile stop [OPTIONS]
-
-Options:
-      --pid <PID>             Leader process ID from `grok leader list`
-      --json
-      --debug                 Enable debug logging
-      --debug-file <FILE>     Write debug logs to FILE
-  -h, --help                  Print help
-      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
-
 ## grok mcp --help
 
 Manage MCP server configurations
@@ -436,11 +314,13 @@ Manage MCP server configurations
 Usage: grok mcp [OPTIONS] <COMMAND>
 
 Commands:
-  list    List configured MCP servers
-  add     Add or update an MCP server
-  remove  Remove an MCP server
-  doctor  Diagnose MCP server configuration and connectivity
-  help    Print this message or the help of the given subcommand(s)
+  list     List configured MCP servers
+  add      Add or update an MCP server
+  remove   Remove an MCP server
+  enable   Enable an MCP server
+  disable  Disable an MCP server
+  doctor   Diagnose MCP server configuration and connectivity
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
       --debug                 Enable debug logging
@@ -614,7 +494,7 @@ Manage git worktrees
 Usage: grok worktree [OPTIONS] <COMMAND>
 
 Commands:
-  list  List tracked worktrees
+  list  List tracked worktrees [aliases: ls]
   show  Show details for a specific worktree
   rm    Remove worktrees
   gc    Garbage-collect orphaned/stale worktrees
@@ -979,7 +859,7 @@ Usage: grok plugin marketplace [OPTIONS] <COMMAND>
 
 Commands:
   list    List configured marketplace sources and their plugins
-  add     Add a marketplace source (git URL or GitHub shorthand)
+  add     Add a marketplace source (git URL, GitHub shorthand, or local path)
   remove  Remove a marketplace source and uninstall its plugins
   update  Refresh marketplace source(s) and sync git caches
   help    Print this message or the help of the given subcommand(s)
@@ -1005,14 +885,15 @@ Options:
 
 ## grok plugin marketplace add --help
 
-Add a marketplace source (git URL or GitHub shorthand)
+Add a marketplace source (git URL, GitHub shorthand, or local path)
 
 Usage: grok plugin marketplace add [OPTIONS] <URL>
 
 Arguments:
-  <URL>  Git URL or GitHub shorthand (e.g. user/repo)
+  <URL>  Git URL, GitHub shorthand (e.g. user/repo), or local directory path
 
 Options:
+      --force                 Skip the reachability probe (e.g. for hosts only reachable on VPN)
       --debug                 Enable debug logging
       --debug-file <FILE>     Write debug logs to FILE
   -h, --help                  Print help
@@ -1022,10 +903,10 @@ Options:
 
 Remove a marketplace source and uninstall its plugins
 
-Usage: grok plugin marketplace remove [OPTIONS] <URL>
+Usage: grok plugin marketplace remove [OPTIONS] <SOURCE>
 
 Arguments:
-  <URL>  Git URL or local path of the source to remove
+  <SOURCE>  Name, git URL, or local path of the source to remove
 
 Options:
       --debug                 Enable debug logging
@@ -1050,20 +931,121 @@ Options:
 
 ## grok import --help
 
-Import sessions into Grok
+Grok Build TUI
 
-Usage: grok import [OPTIONS] [TARGETS]...
+Usage: grok [OPTIONS] [PROMPT] [COMMAND]
 
 Arguments:
-  [TARGETS]...  Session IDs or .jsonl paths to import. Omit to import all available sessions
+  [PROMPT]  Initial prompt for the interactive session, e.g. `grok "fix the bug"` or `grok --worktree=feat "create this feature"`
 
 Options:
-      --list                  List available sessions without importing
-      --json                  NDJSON output to stdout
-      --debug                 Enable debug logging
-      --debug-file <FILE>     Write debug logs to FILE
-  -h, --help                  Print help
-      --leader-socket <PATH>  Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+      --agent <NAME>
+          Agent name or definition file path
+      --agents <JSON>
+          Inline subagent definitions as JSON
+      --allow <RULE>
+          Permission allow rule (compat alias: --allowedTools)
+      --always-approve
+          Auto-approve all tool executions
+  -c, --continue
+          Continue the most recent session for the current working directory
+      --cwd <CWD>
+          Working directory
+      --debug
+          Enable debug logging
+      --debug-file <FILE>
+          Write debug logs to FILE
+      --deny <RULE>
+          Permission deny rule (compat alias: --disallowedTools)
+      --disable-web-search
+          Disable web search and web fetch tools
+      --disallowed-tools <TOOLS>
+          Built-in tools to remove (comma-separated)
+      --experimental-memory
+          Enable cross-session memory
+      --fork-session
+          When resuming (`--resume` / `--continue`), create a new session ID instead of reusing the original (optionally set via `--session-id`)
+      --fullscreen
+          Open in the standard fullscreen TUI for this session, overriding a config `[ui] screen_mode = "minimal"` preference. Session-scoped only — does not write config. Fullscreen-vs-inline still follows the alt-screen policy (--no-alt-screen, [terminal] alt_screen, terminal auto-detection)
+  -h, --help
+          Print help
+      --json-schema <SCHEMA>
+          JSON Schema for structured output. When set, the model is constrained to produce JSON matching this schema. Implies --output-format json. Example: --json-schema '{"type":"object","properties":{"name":{"type":"string"}}}'
+      --leader-socket <PATH>
+          Use a custom leader socket path instead of the default `~/.grok/leader.sock`
+  -m, --model <MODEL>
+          Model ID to use
+      --max-turns <N>
+          Maximum number of agent turns
+      --minimal
+          Experimental: scrollback-native rendering. Finalized blocks are printed into the terminal's native scrollback (use the terminal's own scroll / selection); a small pinned region holds the prompt + running turn. Session-scoped only — does not write config. To default plain `grok` to minimal, set `[ui] screen_mode = "minimal"` in ~/.grok/config.toml
+      --no-alt-screen
+          Run inline instead of using the terminal alternate screen
+      --no-memory
+          Disable cross-session memory for this session
+      --no-plan
+          Disable plan mode
+      --no-subagents
+          Disable subagent spawning
+      --oauth
+          Use OAuth when the welcome screen starts authentication
+      --output-format <OUTPUT_FORMAT>
+          Output format for headless mode [default: plain] [possible values: plain, json, streaming-json]
+  -p, --single <PROMPT>
+          Single-turn prompt. Prints the response to stdout and exits
+      --permission-mode <MODE>
+          Permission mode [possible values: default, acceptEdits, auto, dontAsk, bypassPermissions, plan]
+      --prompt-file <PATH>
+          Single-turn prompt from a file
+      --prompt-json <JSON>
+          Single-turn prompt as JSON content blocks
+  -r, --resume [<SESSION_ID_OR_TITLE>]
+          Resume a session by ID or title, or the most recent if omitted. Non-ID values match session titles for the current directory (ignoring letter case; a sole renamed match wins among duplicates, otherwise ambiguity errors; UUID-shaped values always mean IDs)
+      --reasoning-effort <EFFORT>
+          Reasoning effort for reasoning models [aliases: --effort]
+      --restore-code
+          Check out the original session's commit when resuming
+      --rules <RULES>
+          Extra rules to append to the system prompt
+  -s, --session-id <SESSION_ID>
+          Use a specific session UUID for a **new** conversation (must be a valid UUID and must not already exist under the target session directory). With `--resume`/`--continue`, only valid together with `--fork-session` (names the forked session). Does not resume existing sessions — use `--resume` / `--continue` instead
+      --sandbox <PROFILE>
+          Sandbox profile for filesystem and network access [env: GROK_SANDBOX=]
+      --system-prompt-override <PROMPT>
+          Override the agent's system prompt (compat alias: --system-prompt)
+      --tools <TOOLS>
+          Built-in tools to allow (comma-separated)
+  -v, --version
+          Print version
+      --verbatim
+          Send the prompt exactly as given
+  -w, --worktree [<WORKTREE>]
+          Start the session in a new git worktree, optionally named
+      --worktree-ref <WORKTREE_REF>
+          Branch, tag, or commit to base the worktree on (with `--worktree`). Defaults to the current HEAD of the source checkout when omitted [aliases: --ref]
+
+Commands:
+  agent        Run Grok without the interactive UI
+  completions  Generate shell completion scripts (bash, zsh, fish, powershell, ...)
+  dashboard    Open the Agent Dashboard view at startup
+  doctor       Check terminal, clipboard, color, and input support without starting Grok
+  export       Export a session transcript as Markdown
+  help         Print this message or the help of the given subcommand(s)
+  inspect      Show the configuration Grok discovers for this directory
+  leader       Manage running leader processes
+  login        Sign in to Grok
+  logout       Sign out and clear cached credentials
+  mcp          Manage MCP server configurations
+  memory       Manage cross-session memory
+  models       List available models and exit
+  plugin       Manage plugins and marketplace sources
+  sessions     List, search, or restore sessions
+  setup        Fetch and install managed configuration
+  trace        Export or upload session trace data
+  update       Check for updates or install a specific version
+  version      Print version information [aliases: v]
+  worktree     Manage git worktrees
+  wrap         Run any command with local clipboard support (OSC 52 → system clipboard)
 
 ## grok inspect --help
 
@@ -1140,6 +1122,7 @@ Fetch and install managed configuration
 Usage: grok setup [OPTIONS]
 
 Options:
+      --json                  Print the fetched configuration as JSON instead of installing it; writes nothing to ~/.grok
       --debug                 Enable debug logging
       --debug-file <FILE>     Write debug logs to FILE
   -h, --help                  Print help
