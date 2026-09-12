@@ -257,6 +257,14 @@ just demo basic     # run an example
 
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
+## Related
+
+Go SDKs for other coding-agent CLIs:
+
+- [claude-code-go](https://github.com/lancekrogers/claude-code-go) wraps `claude`
+- [vercel-fx-go](https://github.com/Obedience-Corp/vercel-fx-go) wraps `fx`
+- [cursor-agent-go](https://github.com/Obedience-Corp/cursor-agent-go) wraps `cursor-agent`
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

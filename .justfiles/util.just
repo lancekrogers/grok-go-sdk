@@ -185,6 +185,13 @@ _cli-help-snapshot output:
         "trace"
         "update"
         "version"
+        "clone"
+        "du"
+        "usage"
+        "cursor-worker"
+        "cursor-worker start"
+        "cursor-worker stop"
+        "cursor-worker status"
         "completions"
     )
     {
