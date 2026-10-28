@@ -4,6 +4,8 @@
   <a href="https://github.com/lancekrogers/grok-go-sdk/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lancekrogers/grok-go-sdk/ci.yml?branch=main&label=CI"></a>
   <a href="https://pkg.go.dev/github.com/lancekrogers/grok-go-sdk"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/lancekrogers/grok-go-sdk.svg"></a>
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg">
+  <a href="https://github.com/Obedience-Corp/festival"><img src="https://img.shields.io/badge/built%20with-Festival-7c3aed.svg" alt="Built with Festival"></a>
+
 </p>
 
 A Go library for programmatically integrating the [grok](https://github.com/xai-org/grok)
